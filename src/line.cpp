@@ -38,3 +38,18 @@ void line::draw()
     glBindVertexArray(this->VAO); //Seleciona o vertex array
     glDrawArrays(GL_LINES, 0, this->vertices.size()/3); //Desenha as linhas presentes nos buffers
 }
+
+
+
+lineStrip::lineStrip(GLenum usage): line(usage){} 
+
+lineStrip::lineStrip(std::vector<GLfloat> &vertex, GLenum usage ) : line(vertex,usage){}
+
+void lineStrip::draw()
+{
+    geometry::program->use(); //Usa o programa
+    glUniform3fv(this->colorLoc, 1, &(this->color[0])); //passa a cor da linha para o shader
+    glBindVertexArray(this->VAO); //Seleciona o vertex array
+    glDrawArrays(GL_LINE_STRIP, 0, this->vertices.size()/3); //Desenha as linhas presentes nos buffers
+    glDrawArrays(GL_POINTS, 0, this->vertices.size()/3);
+}

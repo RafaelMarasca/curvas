@@ -12,7 +12,6 @@
 #define GEOMETRY_H
 
 #include"shaderProgram.h"
-#include"matrix.h"
 #include<GL/glew.h>
 #include<cstddef>
 #include<vector>
@@ -68,9 +67,6 @@ class geometry
     protected:
         static shaderProgram* program; //POnteiro para o shaderProgram
 
-        //Função auxiliar estática de transformação.
-        static void transform(matrix* transformMatrix, std::vector<GLfloat>&vec);
-
         std::vector<GLfloat> centralPoint; //Ponto central da forma
         std::vector<GLfloat> vertices; //Vetor de vértices da forma
         GLuint VBO; //Vertex Buffer Object
@@ -92,6 +88,9 @@ class geometry
         bool collision(GLfloat x, GLfloat y, GLfloat z); //Detecta colisão entre a forma e um ponto.
         bool collision(geometry* ); //Detecta colisão entre duas formas.
         
+        void print();
+
+
         virtual void draw() = 0; //Método virtual puro para desenho da forma.
 };
 

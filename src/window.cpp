@@ -1,6 +1,6 @@
 /**
  * @file window.cpp
- * @author Rafael Marasca Martins
+ * @author Rafael Marasca Martins e Lucas Carvalho
  * @brief Implementação da classe window e dos métodos da classe.
  * @version 0.1
  * @date 2022-09
@@ -16,13 +16,15 @@
 #include<GL/glew.h>
 #include<iostream>
 #include<sstream>
-#include"point.h"
 #include<thread>
 #include<cmath>
 #include"curves.h"
 
 int closeFlag = false; //Inicializa a flag de fechamento
 int inputFlag = 0; //Inicializa a flag de entrada
+
+int pressed_order = 0;
+
 
 /**
  * @brief Função chamada ao se pressionar uma tecla
@@ -55,7 +57,18 @@ void window::keyp(unsigned char key, int x, int y)
                 std::cout<<s<<std::endl;
             }
         break;
+
+        case 32:
+            w->waitingMouse = 4;
+            w->selectedShapeID  = w->vision->addObject(new bSpline(3));
+            if(w->selectedShapeID == 0)
+                std::cout<<"erro 404";
+            w->selectedShape = w->vision->getObject(w->selectedShapeID).second;
+        break;
     }
+
+    //if(key>48 && key <52)
+        //pressed_order = int(key-48);
 
     glutPostRedisplay(); //Requere que a tela seja redesenhada.
 }
@@ -102,10 +115,6 @@ window::window(int width, int height, const char* title, int* argc, char** argv)
     this->height = height; //Inicializa a altura da tela
     this->selectedShape = nullptr; //Inicializa a forma selecionada como NULL (Nenhuma forma selecionada)
     this->selectedShapeID = 0; //Inicializa o ID de forma selecionada como 0 (Nenhuma forma selecionada)
-
-
-    std::vector<GLfloat> points{-0.4, -0.4, 0.0, -0.2, 0.4, 0.0, 0.2 , -0.4, 0.0, 0.4, 0.4, 0.0};
-    this->vision->addObject(new bSpline(points,3));
 
 }
 
@@ -201,25 +210,41 @@ void window::redisplay()
  */
 void window::updateScene()
 {
-    //Verifica se está há cliques de mouse na fila
-    /*if(!this->waitingMouse && this->mouseQueue.size())
+
+    if(this->mouseQueue.size())
     {
-        std::vector<GLfloat> center;
-        for (int i = 0; i<3; i++)
+        if(this->selectedShape)
         {
-            center.emplace(center.begin(),mouseQueue.back());
-            mouseQueue.pop_back();
+
+            bSpline* B = dynamic_cast <bSpline*> (this->selectedShape);
+            
+            if((this->vision->checkCollision(this->mouseQueue[0], this->mouseQueue[1])).first)
+            {
+                this->mouseQueue.clear(); // Limpa a fila do mouse.
+                std::cout<<"ERROOOOOOOO"<<std::endl;
+                this->waitingMouse = 0;
+                return;
+            }
+            
+            B->addControlPoint(this->mouseQueue);
+            std::cout<<this->mouseQueue.size()<<std::endl;
+            this->mouseQueue.clear(); // Limpa a fila do mouse.
+
+            if(!this->waitingMouse)
+            {
+               bSpline* B = dynamic_cast <bSpline*> (this->selectedShape);
+               B->generate();
+            }
         }
-        //Adiciona a forma desenhada na cena.
-        this->vision->addObject(new point(this->mouseQueue));
-        
-        this->mouseQueue.clear(); // Limpa a fila do mouse.
-    }else if(buffer.size()) //Caso haja entrada do usuário disponível para ser consumida, parsea o buffer
+    }
+    
+    
+    /*else if(buffer.size()) //Caso haja entrada do usuário disponível para ser consumida, parsea o buffer
     {  
         
         this->buffer.clear();
         std::cout<<s<<std::endl;
-    }  */
+    } */
 }
 
 
@@ -253,7 +278,9 @@ void window::mouseClick(int button, int state,int x, int y)
 
             std::vector<GLfloat> coordinates = {xpos, ypos, 0.0f};
 
-            w->vision->addObject(new point(coordinates));
+            std::cout<<xpos<<" "<<ypos<<std::endl;
+
+            //w->vision->addObject(new point(coordinates));
     
             //Verifica se houve colisão entre o clique do mouse e algum objeto da cena
 			//std::pair<unsigned int, geometry*> temp = w->vision->checkCollision(xpos,ypos);
@@ -283,6 +310,16 @@ void window::mouseClick(int button, int state,int x, int y)
                 w->select(temp); //Caso não haja colisão e não estejam sendo selecionados
                                  //os vértices de uma forma, limpa a seleção atual
             }*/
+
+            if(w->waitingMouse)
+            { 
+                w->mouseQueue.push_back(GLfloat(xpos));
+                w->mouseQueue.push_back(GLfloat(ypos));
+                w->mouseQueue.push_back(0.0f);
+                w->waitingMouse--;
+                pressed_order = 1;
+            }
+
            glutPostRedisplay(); //Requere que a tela seja redesenhada
         }
     }

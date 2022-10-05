@@ -12,7 +12,6 @@
 
 #include"geometry.h"
 #include"shaderProgram.h"
-#include"matrix.h"
 #include<vector>
 #include<string>
 #include<iostream>
@@ -158,61 +157,29 @@ void geometry::setup()
  * @param x : coordenada x do ponto.
  * @param y : coordenada y do ponto.
  * @param z : coordenada z do ponto.
- * @return true : Se há uma colisão entre o ponto x,y,z e a forma.
- * @return false : Caso não haja colisão entre o ponto x,y,z e a forma.
+ * @return true : Se há uma colisão entre um dos pontos de controle e o ponto x,y,z.
+ * @return false : Caso não haja colisão entre o ponto x,y,z e algum ponto de controle.
  */
 bool geometry::collision(GLfloat x, GLfloat y, GLfloat z)
 {
     std::vector<GLfloat>::iterator it; //Iterator para um vector de GLfloat
-    int i = 1; //Variável auxiliar
-
-    //Inicializa o vetor que representa os valores mínimos e máximos das coordenadas x e y da forma
-    std::vector<GLfloat> min_max={std::numeric_limits<float>::max(),std::numeric_limits<float>::lowest(),
-                                 std::numeric_limits<float>::max(),std::numeric_limits<float>::lowest()};
                                  
     //Verifica se há colisão entre o ponto e os vértices                                 
     for(it = this->vertices.begin(); it!= this->vertices.end(); it+=3)
     {
-       if((std::abs(*it - x) < 0.0000001f ) && (std::abs(*(it+1) - y) < 0.000001f ))
+       if((std::abs(*it - x) < 0.001f ) && (std::abs(*(it+1) - y) < 0.001f ))
         return true;
     }
                              
-    //Obtém os pontos mínimos e máximos das coordenadas x e y e armazena no vetor min_max
-    for(it = this->vertices.begin(); it!= this->vertices.end(); it++)
-    {
-        if(i%3 == 1)
-        {
-            if(*it<min_max[0])
-                min_max[0] = *it;
-            if(*it>min_max[1])
-                min_max[1] = *it;
-        }else if(i%3 == 2)
-        {
-            if(*it<min_max[2])
-                min_max[2] = *it;
-            if(*it>min_max[3])
-                min_max[3] = *it;
-        }   
-        i++;
-    }
-
-    //verifica se o ponto se encontra dentro dos limites do vetor min_max
-    if(x>min_max[0] && x<min_max[1] && y>min_max[2] && y<min_max[3])
-    {
-        //Sim, o ponto se encontra dentro dos limites(colisão).
-        return true;
-    }else{
-        //Não o ponto não se encontra dentro dos limites (i.e. não há colisão).
-        return false;
-    }   
+    
 }
 
 /**
  * @brief Verifica colisão entre duas formas
  * 
  * @param other : a forma a se verificar colisão.
- * @return true : Caso haja colisão entre as formas.
- * @return false : Caso não haja colisão entre as formas.
+ * @return true : Caso haja colisão entre as curvas.
+ * @return false : Caso não haja colisão entre as curvas.
  */
 bool geometry::collision(geometry* other)
 {
@@ -221,7 +188,6 @@ bool geometry::collision(geometry* other)
     //Verifica se há colisão entre um dos vértices do outro objeto e a forma atual.        
     for(it = other->vertices.begin(); it!= other->vertices.end(); it+=3)
     {
-
         if(this->collision(*it, *(it+1), *(it+2)))
 			return true; //colisão detectada.
     }
@@ -242,4 +208,13 @@ void geometry::setColor(GLfloat r, GLfloat g, GLfloat b)
     this->color[0] = r;
     this->color[1] = g;
     this->color[2] = b;
+}
+
+
+void geometry::print()
+{
+    for(int i = 0; i<this->vertices.size(); i+=3)
+    {
+        std::cout<<std::endl<<this->vertices[i]<<" "<<this->vertices[i+1]<<" "<<this->vertices[i+2]<<std::endl;
+    }
 }
