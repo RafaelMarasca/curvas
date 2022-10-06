@@ -118,7 +118,7 @@ std::pair<unsigned int, geometry*> scene::getObject(unsigned int id)
 std::pair<unsigned int, geometry*> scene::checkCollision(float x, float y)
 {
 	
-	std::pair<unsigned int, geometry*>object{0, nullptr};
+	std::pair<unsigned int, geometry*>object = {0, nullptr};
 	for(std::map<unsigned int,geometry*>::iterator it = this->objects.begin(); it != this->objects.end(); it++)
     {
         if(it->second->collision(x,y,0.0f))
@@ -148,9 +148,8 @@ std::pair<unsigned int, geometry*> scene::checkCollision(geometry* geo)
         if(it->second->collision(geo))
 			return *it;
     }
-    return std::pair<unsigned int, geometry*>{0,nullptr};
+    return std::pair<unsigned int, geometry*>(0,nullptr);;
 }
-
 /**
  * @brief Iterator para o início da cena
  * 

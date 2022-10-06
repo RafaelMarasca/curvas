@@ -39,6 +39,7 @@ class window
 
         int waitingMouse; //Flag de espera do mouse.
         int width,height; //Altura e largura da tela.
+        int menu;
         
         unsigned int selectedShapeID; //ID da forma selecionada
 
@@ -58,6 +59,7 @@ class window
         void updateScene(); //Método de atualização da cena exibida na tela.
         void deleteShape(); //Meétodo para deletar uma forma
         void select(std::pair<unsigned int, geometry*>); //Método para selecionar uma forma
+        void clearSelection();
 
         static void redisplay(); //Método para requerer o redesenho da tela.
         static void draw(); //Método para desenhar os objetos da cena.
@@ -66,6 +68,8 @@ class window
         static void keyp(unsigned char, int x, int y); //Método chamado ao pressionar uma tecla
         static void resize(int w, int h); //Método chamado ao redimensionar a tela
         static void mouseMove(int x, int y);
+        static void createMenu();
+        static void splineManagement(int option);
 };
 
 

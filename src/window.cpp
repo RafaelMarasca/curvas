@@ -41,7 +41,7 @@ void window::keyp(unsigned char key, int x, int y)
     {
         //Tecla ESC
         case 27:
-            w->select(std::pair<unsigned int, geometry*>(0, nullptr)); //Desseleciona os objetos
+            w->clearSelection(); //Desseleciona os objetos
         break;
     
         //Tecla DEL
@@ -103,6 +103,7 @@ window::window(int width, int height, const char* title, int* argc, char** argv)
     glPointSize(7);
     glEnable(GL_LINE_SMOOTH);
     glLineWidth(2);
+    this->createMenu();
 
     //Inicializa o GLEW
     if(glewInit() != GLEW_OK)
@@ -281,9 +282,7 @@ void window::mouseClick(int button, int state,int x, int y)
                 ypos =  ((-2.0*float(y)/float(w->height)) + 1.0f)/w->aspectRatio;
             }
 
-            //std::vector<GLfloat> coordinates = {xpos, ypos, 0.0f};
-
-            //std::cout<<xpos<<" "<<ypos<<std::endl;
+            std::vector<GLfloat> coordinates = {xpos, ypos, 0.0f};
 
             if(mouseFlag == 0 && !w->waitingMouse)
             {
@@ -291,8 +290,6 @@ void window::mouseClick(int button, int state,int x, int y)
                 mouseFlag = 1;
                 w->selectionBox->addStart(xpos,ypos);
             }
-
-            //w->vision->addObject(new point(coordinates));
     
             //Verifica se houve colisão entre o clique do mouse e algum objeto da cena
 			//std::pair<unsigned int, geometry*> temp = w->vision->checkCollision(xpos,ypos);
@@ -330,9 +327,6 @@ void window::mouseClick(int button, int state,int x, int y)
                 w->mouseQueue.push_back(0.0f);
                 w->waitingMouse--;
             }
-
-            //std::cout<<"vai la"<<std::endl;
-
         }
 
         if(button == GLUT_LEFT_BUTTON && state == GLUT_UP)
@@ -354,7 +348,15 @@ void window::mouseClick(int button, int state,int x, int y)
                 std::pair<unsigned int, geometry*> temp = w->vision->checkCollision(w->selectionBox);
                 w->select(temp);
                 w->selectionBox->clearVertex();
-                //std::cout<<xpos<<" "<<ypos<<std::endl;
+            }
+        }
+
+        if(button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
+        {
+            if(w->selectedShape){
+              glutAttachMenu(GLUT_RIGHT_BUTTON);  //createMenu();
+            
+                std::cout<<"teste"<<std::endl;
             }
         }
 
@@ -379,8 +381,8 @@ void window::deleteShape()
 		{
             //Limpa a seleção
 		    delete temp;
-			this->selectedShape = nullptr;
-			this->selectedShapeID = 0;
+            this->clearSelection();
+			
 		}
     }else
     {
@@ -401,6 +403,19 @@ void window::select(std::pair<unsigned int, geometry*> obj)
         this->selectedShape->setColor(SELECTION_R, SELECTION_G, SELECTION_B); //Muda a cora da nova forma selecionada
     this->selectedShapeID = obj.first;
     
+    if(obj.second == nullptr)
+        glutDetachMenu(GLUT_RIGHT_BUTTON);
+
+    glutPostRedisplay(); //Requere que a tela seja redesenhada.
+}
+
+void window::clearSelection()
+{
+    this->selectedShape = nullptr;
+    this->selectedShapeID = 0;
+
+    glutDetachMenu(GLUT_RIGHT_BUTTON);
+
     glutPostRedisplay(); //Requere que a tela seja redesenhada.
 }
 
@@ -473,4 +488,48 @@ void window::mouseMove(int x, int y)
 
         glutPostRedisplay();
     }
+}
+
+
+void window::createMenu()
+{
+    window* w = (window*)glutGetWindowData();
+
+    w->menu = glutCreateMenu(splineManagement);
+    glutAddMenuEntry("Prender", 0);
+    glutAddMenuEntry("Desprender", 1);
+    glutAddMenuEntry("Mostrar Pontos de Controle", 2);
+    glutAddMenuEntry("Esconder Pontos de Controle", 3);
+}
+
+
+
+void window::splineManagement(int option)
+{
+    window* w = (window*)glutGetWindowData();
+    
+    if(w->selectedShape)
+    {
+        bSpline *B = dynamic_cast<bSpline *>(w->selectedShape);;
+        switch (option)
+        {
+        case 0:
+            B->makeClamped();
+            break;
+
+        case 1:
+            B->makeUnclamped();
+            break;
+
+        case 2:
+            B->setControlPointsVisibility(true);
+            break;
+
+        case 3:
+            B->setControlPointsVisibility(false);
+            break;
+        }
+        glutPostRedisplay();
+    }
+    
 }

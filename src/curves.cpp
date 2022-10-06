@@ -40,15 +40,26 @@ void bSpline::generate()
 
     int size = controlPoints.size()/3;
 
-    for(int i = 0; i<(size+1-this->order); i++)
+
+    if(this->isClamped)
     {
-        this->knots.push_back(float(i)/float(size-order));
-        if(i == 0 || i == (size-this->order))
+        for(int i = 0; i<(size+1-this->order); i++)
         {
-            for(int j = 0; j< this->order; j++)
-                this->knots.push_back(this->knots[i == 0? 0:(size)]);
+            this->knots.push_back(float(i)/float(size-order));
+            if(i == 0 || i == (size-this->order))
+            {
+                for(int j = 0; j< this->order; j++)
+                    this->knots.push_back(this->knots[i == 0? 0:(size)]);
+            }
+        }
+    }else
+    {
+        for(int i = 0; i<(size+this->order+1); i++)
+        {
+            this->knots.push_back(float(i)/float(size+this->order));
         }
     }
+    
 
     /**for(int i = 0; i<knots.size(); i++)
     {
@@ -56,9 +67,9 @@ void bSpline::generate()
     }*/
    
 
-    float t = 0.0f;//this->knots[order] + RESOLUTION;
+    float t = this->knots[order];//0.0f; + RESOLUTION;
 
-    while(t <= 1.0f)//*(this->knots.end()-order-1))
+    while(t <= *(this->knots.end()-order-1))//1.0f
     {
         this->vertices.push_back(0.0f);
         this->vertices.push_back(0.0f);
@@ -97,6 +108,8 @@ void bSpline::addControlPoint(std::vector<GLfloat>& newControlPoint)
 
 bSpline::bSpline(int order, GLenum usage /*= GL_DYNAMIC_DRAW*/) : geometry(usage)
 {
+    this->isClamped = true;
+    this->controlPointsVisibility = true;
     this->order = order;
     this->geometry::setColor(R_SPLINE, G_SPLINE, B_SPLINE);
     this->controlLine = new lineStrip();
@@ -105,6 +118,8 @@ bSpline::bSpline(int order, GLenum usage /*= GL_DYNAMIC_DRAW*/) : geometry(usage
 
 bSpline::bSpline(std::vector<GLfloat>& controlPoints, int order, GLenum usage /*= GL_DYNAMIC_DRAW*/): geometry(usage)
 {
+    this->isClamped = true;
+    this->controlPointsVisibility = true;
     this->geometry::setColor(R_SPLINE, G_SPLINE, B_SPLINE);
     this->order = order;
     this->controlLine = new lineStrip();
@@ -119,7 +134,8 @@ bSpline::~bSpline()
 
 void bSpline::draw()
 {
-    this->controlLine->draw();
+    if(this->controlPointsVisibility)
+        this->controlLine->draw();
     geometry::program->use();
     glUniform3fv(this->colorLoc, 1, &(this->color[0]));
     glBindVertexArray(this->VAO);
@@ -182,4 +198,31 @@ void bSpline::resetColor()
 {
     this->geometry::setColor(R_SPLINE,G_SPLINE,B_SPLINE);
     this->controlLine->setColor(R_CONTROL,G_CONTROL,B_CONTROL);
+}
+
+void bSpline::makeClamped()
+{
+    if(!this->isClamped)
+    {
+        this->isClamped = true;
+        this->vertices.clear();
+        this->knots.clear();
+        this->generate();
+    }    
+}
+
+void bSpline::makeUnclamped()
+{
+    if(this->isClamped)
+    {
+        this->isClamped = false;
+        this->vertices.clear();
+        this->knots.clear();
+        this->generate();
+    }  
+}
+
+void bSpline::setControlPointsVisibility(bool isVisible)
+{
+    this->controlPointsVisibility = isVisible;
 }

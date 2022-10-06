@@ -27,6 +27,9 @@ class bSpline : public geometry
 
         lineStrip* controlLine;
 
+        bool isClamped;
+        bool controlPointsVisibility;
+
     public:
 
         bSpline(int order, GLenum usage = GL_STATIC_DRAW);
@@ -37,14 +40,13 @@ class bSpline : public geometry
         bool collision(GLfloat x, GLfloat y, GLfloat z);
 
         void addControlPoint(std::vector<GLfloat>& newControlPoint);
-
         void generate();
-
         void setColor(GLfloat r, GLfloat g, GLfloat b);
         void resetColor();
-
-
         void draw();
+        void makeClamped();
+        void makeUnclamped();
+        void setControlPointsVisibility(bool isVisible);
 };
 
 
