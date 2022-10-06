@@ -98,14 +98,14 @@ void bSpline::addControlPoint(std::vector<GLfloat>& newControlPoint)
 bSpline::bSpline(int order, GLenum usage /*= GL_DYNAMIC_DRAW*/) : geometry(usage)
 {
     this->order = order;
-    this->setColor(R_SPLINE, G_SPLINE, B_SPLINE);
+    this->geometry::setColor(R_SPLINE, G_SPLINE, B_SPLINE);
     this->controlLine = new lineStrip();
     this->controlLine->setColor(R_CONTROL, G_CONTROL, B_CONTROL);
 }
 
 bSpline::bSpline(std::vector<GLfloat>& controlPoints, int order, GLenum usage /*= GL_DYNAMIC_DRAW*/): geometry(usage)
 {
-    this->setColor(R_SPLINE, G_SPLINE, B_SPLINE);
+    this->geometry::setColor(R_SPLINE, G_SPLINE, B_SPLINE);
     this->order = order;
     this->controlLine = new lineStrip();
     this->controlLine->setColor(R_CONTROL, G_CONTROL, B_CONTROL);
@@ -158,16 +158,28 @@ bool bSpline::collision(GLfloat x, GLfloat y, GLfloat z)
  * @return true : Caso haja colisão entre as curvas.
  * @return false : Caso não haja colisão entre as curvas.
  */
-bool bSpline::collision(bSpline* other)
+bool bSpline::collision(geometry* other)
 {
     std::vector<GLfloat>::iterator it;
 
     //Verifica se há colisão entre um dos pontos de controle da outra curva e a outra curva.        
-    for(it = other->controlPoints.begin(); it!= other->controlPoints.end(); it+=3)
+    for(it = this->controlPoints.begin(); it!= this->controlPoints.end(); it+=3)
     {
-        if(this->collision(*it, *(it+1), *(it+2)))
+        if(other->collision(*it, *(it+1), *(it+2)))
 			return true; //colisão detectada.
     }
  
     return false; // Não foi detectada colisão.
+}
+
+void bSpline::setColor(GLfloat r, GLfloat g, GLfloat b)
+{
+    this->geometry::setColor(r,g,b);
+    this->controlLine->setColor(r,g,b);
+}
+
+void bSpline::resetColor()
+{
+    this->geometry::setColor(R_SPLINE,G_SPLINE,B_SPLINE);
+    this->controlLine->setColor(R_CONTROL,G_CONTROL,B_CONTROL);
 }

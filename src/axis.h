@@ -23,6 +23,7 @@
  */
 class axis : public line
 {
+  
   public:
     axis(); //Construtor da classe axis
     ~axis(); //Destrutor da classe axis

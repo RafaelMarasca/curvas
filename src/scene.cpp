@@ -36,7 +36,7 @@ void scene::draw()
 {
     this->theAxis->draw();
     
-    for(std::map<unsigned int,bSpline*>::iterator it = this->objects.begin(); it != this->objects.end(); it++)
+    for(std::map<unsigned int,geometry*>::iterator it = this->objects.begin(); it != this->objects.end(); it++)
     {
         it->second->draw();
     }
@@ -49,9 +49,9 @@ void scene::draw()
  * @return unsigned int : ID != 0 atribuído ao objeto caso a inserção tenha sido bem-sucedida 
  * @return 0 : caso a inserção tenha sido mal-sucedida
  */
-unsigned int scene::addObject(bSpline* object)
+unsigned int scene::addObject(geometry* object)
 {
-	if(this->checkCollision(object))
+	if(this->checkCollision(object).second)
 	{
 		return 0;
 	}else{
@@ -66,13 +66,13 @@ unsigned int scene::addObject(bSpline* object)
  * @brief Remove um objeto da cena
  * 
  * @param id : ID do objeto a ser removida
- * @return bSpline* : ponteiro para o objeto removido caso a remoção tenha sido bem-sucedida
+ * @return geometry* : ponteiro para o objeto removido caso a remoção tenha sido bem-sucedida
  * @return nullptr : caso a remoção tenha sido mal-sucedida
  */
-bSpline* scene::removeObject(unsigned int id)
+geometry* scene::removeObject(unsigned int id)
 {
-    std::map<unsigned int, bSpline*>::iterator it = this->objects.find(id);
-    bSpline* temp = nullptr;
+    std::map<unsigned int, geometry*>::iterator it = this->objects.find(id);
+    geometry* temp = nullptr;
     
     if(it != this->objects.end())
     {
@@ -88,14 +88,14 @@ bSpline* scene::removeObject(unsigned int id)
  * 
  * @param id : ID do objeto a ser recuperado
  * 
- * @return std::pair<unsigned int, bSpline*> {ID, bSpline*} - caso o getter tenha sido bem-sucedido
- * @return std::pair<unsigned int, bSpline*> {0, nullptr} - caso o getter tenha sido mal-sucedido
+ * @return std::pair<unsigned int, geometry*> {ID, geometry*} - caso o getter tenha sido bem-sucedido
+ * @return std::pair<unsigned int, geometry*> {0, nullptr} - caso o getter tenha sido mal-sucedido
  */
-std::pair<unsigned int, bSpline*> scene::getObject(unsigned int id)
+std::pair<unsigned int, geometry*> scene::getObject(unsigned int id)
 {
-    std::map<unsigned int, bSpline*>::iterator it = this->objects.find(id);
+    std::map<unsigned int, geometry*>::iterator it = this->objects.find(id);
     
-    std::pair<unsigned int, bSpline*> object{0,nullptr};    
+    std::pair<unsigned int, geometry*> object{0,nullptr};    
     
     if(it != this->objects.end())
     {
@@ -112,14 +112,14 @@ std::pair<unsigned int, bSpline*> scene::getObject(unsigned int id)
  * 
  * @param x : coordenada x do ponto
  * @param y : coordenada y do ponto
- * @return std::pair<unsigned int, bSpline*> {ID, bSpline*} caso haja colisão
- * @return std::pair<unsigned int, bSpline*> {0, nullptr} - caso não haja colisão
+ * @return std::pair<unsigned int, geometry*> {ID, geometry*} caso haja colisão
+ * @return std::pair<unsigned int, geometry*> {0, nullptr} - caso não haja colisão
  */
-std::pair<unsigned int, bSpline*> scene::checkCollision(float x, float y)
+std::pair<unsigned int, geometry*> scene::checkCollision(float x, float y)
 {
 	
-	std::pair<unsigned int, bSpline*>object{0, nullptr};
-	for(std::map<unsigned int,bSpline*>::iterator it = this->objects.begin(); it != this->objects.end(); it++)
+	std::pair<unsigned int, geometry*>object{0, nullptr};
+	for(std::map<unsigned int,geometry*>::iterator it = this->objects.begin(); it != this->objects.end(); it++)
     {
         if(it->second->collision(x,y,0.0f))
         {
@@ -140,15 +140,15 @@ std::pair<unsigned int, bSpline*> scene::checkCollision(float x, float y)
  * @return true : caso haja colisão com o objeto passado por argumento
  * @return false : caso haja colisão com o objeto passado pr argumento
  */
-bool scene::checkCollision(bSpline* geo)
+std::pair<unsigned int, geometry*> scene::checkCollision(geometry* geo)
 {
 	
-	for(std::map<unsigned int,bSpline*>::iterator it = this->objects.begin(); it != this->objects.end(); it++)
+	for(std::map<unsigned int,geometry*>::iterator it = this->objects.begin(); it != this->objects.end(); it++)
     {
         if(it->second->collision(geo))
-			return true;
+			return *it;
     }
-    return false;
+    return std::pair<unsigned int, geometry*>{0,nullptr};
 }
 
 /**

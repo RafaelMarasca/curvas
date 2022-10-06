@@ -21,6 +21,11 @@
 #include<vector>
 #include<utility>
 
+
+#define SELECTION_R 0.6316f
+#define SELECTION_G 0.0549f
+#define SELECTION_B 0.7882f
+
 /**
  * @brief Classe window - Define uma abstração para uma janela de desenho.
  * 
@@ -30,6 +35,7 @@ class window
     private:
         scene* vision; //Ponteiro para a cena da janela.
         geometry* selectedShape; //Ponteiro para a forma selecionada.
+        square* selectionBox;
 
         int waitingMouse; //Flag de espera do mouse.
         int width,height; //Altura e largura da tela.
@@ -59,6 +65,7 @@ class window
         static void mouseClick(int button, int state,int x, int y); //Método chamado ao clicar na tela
         static void keyp(unsigned char, int x, int y); //Método chamado ao pressionar uma tecla
         static void resize(int w, int h); //Método chamado ao redimensionar a tela
+        static void mouseMove(int x, int y);
 };
 
 

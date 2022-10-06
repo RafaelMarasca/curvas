@@ -40,6 +40,9 @@ void line::draw()
 }
 
 
+bool line::collision(GLfloat x, GLfloat y, GLfloat z){} //Detecta colisão entre a forma e um ponto.
+bool line::collision(geometry* other){}
+
 
 lineStrip::lineStrip(GLenum usage): line(usage){} 
 

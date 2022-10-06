@@ -12,9 +12,9 @@
 #define G_SPLINE 0.0863f
 #define B_SPLINE 0.0588f
 
-#define R_CONTROL 0.1137f 
-#define G_CONTROL 0.9333f
-#define B_CONTROL 0.0784f
+#define R_CONTROL 0.0196f 
+#define G_CONTROL 0.7412f
+#define B_CONTROL 0.0078f
 
 
 class bSpline : public geometry
@@ -33,12 +33,16 @@ class bSpline : public geometry
         bSpline(std::vector<GLfloat>& controlPoints, int order, GLenum usage = GL_STATIC_DRAW);
         ~bSpline();
 
-        bool collision(bSpline* other);
+        bool collision(geometry* other);
         bool collision(GLfloat x, GLfloat y, GLfloat z);
 
         void addControlPoint(std::vector<GLfloat>& newControlPoint);
 
         void generate();
+
+        void setColor(GLfloat r, GLfloat g, GLfloat b);
+        void resetColor();
+
 
         void draw();
 };

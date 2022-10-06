@@ -22,9 +22,7 @@
 
 int closeFlag = false; //Inicializa a flag de fechamento
 int inputFlag = 0; //Inicializa a flag de entrada
-
-int pressed_order = 0;
-
+int mouseFlag = 0;
 
 /**
  * @brief Função chamada ao se pressionar uma tecla
@@ -64,6 +62,7 @@ void window::keyp(unsigned char key, int x, int y)
             if(w->selectedShapeID == 0)
                 std::cout<<"erro 404";
             w->selectedShape = w->vision->getObject(w->selectedShapeID).second;
+            std::cout<<"isso eu fiz";
         break;
     }
 
@@ -93,14 +92,17 @@ window::window(int width, int height, const char* title, int* argc, char** argv)
     glutCreateWindow(title);
     glutDisplayFunc(window::draw);
     glutMouseFunc(window::mouseClick);
+    glutMotionFunc(window::mouseMove);
     glutKeyboardFunc(keyp);
     glutIdleFunc(window::redisplay);
     glutReshapeFunc(window::resize);
     glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE,
-              GLUT_ACTION_GLUTMAINLOOP_RETURNS);
+                    GLUT_ACTION_GLUTMAINLOOP_RETURNS);
     glutSetWindowData(this);
     glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
-    glPointSize(5);
+    glPointSize(7);
+    glEnable(GL_LINE_SMOOTH);
+    glLineWidth(2);
 
     //Inicializa o GLEW
     if(glewInit() != GLEW_OK)
@@ -115,7 +117,8 @@ window::window(int width, int height, const char* title, int* argc, char** argv)
     this->height = height; //Inicializa a altura da tela
     this->selectedShape = nullptr; //Inicializa a forma selecionada como NULL (Nenhuma forma selecionada)
     this->selectedShapeID = 0; //Inicializa o ID de forma selecionada como 0 (Nenhuma forma selecionada)
-
+    this->selectionBox = new square();
+    this->selectionBox->setColor(SELECTION_R,SELECTION_G,SELECTION_B);
 }
 
 /**
@@ -126,7 +129,7 @@ window::~window()
 {
     sceneIterator it;
     std::pair<unsigned int, geometry*> object;
- 
+    
     //Itera por todos os objetos da cena atual e os deleta.
     for(it = this->vision->begin(); it!= this->vision->end(); it++)
     {
@@ -136,6 +139,8 @@ window::~window()
     }
 
     delete this->vision; //Deleta a cena.
+
+    delete this->selectionBox;
 }
 
 
@@ -151,6 +156,7 @@ void window::draw()
     glClear(GL_COLOR_BUFFER_BIT); //Limpa o buffer com a corr de background
     w->updateScene(); //Atualiza a cena
     w->vision->draw(); //Desenha a cena
+    w->selectionBox->draw();
     glutSwapBuffers(); //Troca os buffers (Exibe na tela)
 }
 
@@ -189,6 +195,7 @@ void window::input()
     } 
 }
 
+
 /**
  * @brief Requere o redesenho da tela
  * 
@@ -221,24 +228,22 @@ void window::updateScene()
             if((this->vision->checkCollision(this->mouseQueue[0], this->mouseQueue[1])).first)
             {
                 this->mouseQueue.clear(); // Limpa a fila do mouse.
-                std::cout<<"ERROOOOOOOO"<<std::endl;
                 this->waitingMouse = 0;
-                return;
-            }
-            
-            B->addControlPoint(this->mouseQueue);
-            std::cout<<this->mouseQueue.size()<<std::endl;
-            this->mouseQueue.clear(); // Limpa a fila do mouse.
+                
+            }else{
+                B->addControlPoint(this->mouseQueue);
+                std::cout<<this->mouseQueue.size()<<std::endl;
+                this->mouseQueue.clear(); // Limpa a fila do mouse.
 
-            if(!this->waitingMouse)
-            {
-               bSpline* B = dynamic_cast <bSpline*> (this->selectedShape);
-               B->generate();
-            }
+                if(!this->waitingMouse)
+                {
+                    bSpline* B = dynamic_cast <bSpline*> (this->selectedShape);
+                    B->generate();
+                }
+            }   
         }
     }
-    
-    
+
     /*else if(buffer.size()) //Caso haja entrada do usuário disponível para ser consumida, parsea o buffer
     {  
         
@@ -276,9 +281,16 @@ void window::mouseClick(int button, int state,int x, int y)
                 ypos =  ((-2.0*float(y)/float(w->height)) + 1.0f)/w->aspectRatio;
             }
 
-            std::vector<GLfloat> coordinates = {xpos, ypos, 0.0f};
+            //std::vector<GLfloat> coordinates = {xpos, ypos, 0.0f};
 
-            std::cout<<xpos<<" "<<ypos<<std::endl;
+            //std::cout<<xpos<<" "<<ypos<<std::endl;
+
+            if(mouseFlag == 0 && !w->waitingMouse)
+            {
+                std::cout<<xpos<<" "<<ypos<<std::endl;
+                mouseFlag = 1;
+                w->selectionBox->addStart(xpos,ypos);
+            }
 
             //w->vision->addObject(new point(coordinates));
     
@@ -317,11 +329,36 @@ void window::mouseClick(int button, int state,int x, int y)
                 w->mouseQueue.push_back(GLfloat(ypos));
                 w->mouseQueue.push_back(0.0f);
                 w->waitingMouse--;
-                pressed_order = 1;
             }
 
-           glutPostRedisplay(); //Requere que a tela seja redesenhada
+            //std::cout<<"vai la"<<std::endl;
+
         }
+
+        if(button == GLUT_LEFT_BUTTON && state == GLUT_UP)
+        {
+            float xpos, ypos;
+
+            //Mapeia os cliques das coordenadas da janela para as coordenadas normalizadas
+            if(w->width > w->height){
+                xpos =  ((2.0*float(x)/float(w->width)) - 1.0f)*w->aspectRatio;
+                ypos =  (-2.0*float(y)/float(w->height)) + 1.0f;
+            }else{
+                xpos =  ((2.0*float(x)/float(w->width)) - 1.0f);
+                ypos =  ((-2.0*float(y)/float(w->height)) + 1.0f)/w->aspectRatio;
+            }
+
+            if(mouseFlag == 1 && !w->waitingMouse)
+            {
+                mouseFlag = 0;
+                std::pair<unsigned int, geometry*> temp = w->vision->checkCollision(w->selectionBox);
+                w->select(temp);
+                w->selectionBox->clearVertex();
+                //std::cout<<xpos<<" "<<ypos<<std::endl;
+            }
+        }
+
+        glutPostRedisplay(); //Requere que a tela seja redesenhada
     }
 }
 
@@ -359,9 +396,9 @@ void window::deleteShape()
 void window::select(std::pair<unsigned int, geometry*> obj)
 {
     if(this->selectedShape)
-        this->selectedShape->setColor(GEOMETRY_R,GEOMETRY_G,GEOMETRY_B); //Muda a cor da forma desselecionada
+        this->selectedShape->resetColor(); //Muda a cor da forma desselecionada
     if((this->selectedShape = obj.second))
-        this->selectedShape->setColor(0.36f, 0.54f, 0.54f); //Muda a cora da nova forma selecionada
+        this->selectedShape->setColor(SELECTION_R, SELECTION_G, SELECTION_B); //Muda a cora da nova forma selecionada
     this->selectedShapeID = obj.first;
     
     glutPostRedisplay(); //Requere que a tela seja redesenhada.
@@ -412,4 +449,28 @@ void window::resize(int newWidth, int newHeight)
     glLoadIdentity ();
 
     glutPostRedisplay();
+}
+
+
+void window::mouseMove(int x, int y)
+{
+    window* w = (window*)glutGetWindowData(); //Obtém os dados da janela
+
+    if(mouseFlag)
+    {
+        float xpos, ypos;
+
+        //Mapeia os cliques das coordenadas da janela para as coordenadas normalizadas
+        if(w->width > w->height){
+            xpos =  ((2.0*float(x)/float(w->width)) - 1.0f)*w->aspectRatio;
+            ypos =  (-2.0*float(y)/float(w->height)) + 1.0f;
+        }else{
+            xpos =  ((2.0*float(x)/float(w->width)) - 1.0f);
+            ypos =  ((-2.0*float(y)/float(w->height)) + 1.0f)/w->aspectRatio;
+        }
+
+        w->selectionBox->updateLength(xpos,ypos);
+
+        glutPostRedisplay();
+    }
 }

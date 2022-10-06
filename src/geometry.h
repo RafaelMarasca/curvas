@@ -54,6 +54,9 @@ const std::string fragmentShaderSource =
         "FragColor = vec4(color, 0.2f);\n"
         "}\n";
 
+
+
+
 /**
  * @brief Classe geometry - Define a abstração de uma forma geométrica.
  * 
@@ -83,15 +86,36 @@ class geometry
 
         void addVertex(std::vector<GLfloat> &vertex); //Insere vértices na forma.
         
-        void setColor(GLfloat r, GLfloat g, GLfloat b); //Setter para a cor do objeto.
-        
-        bool collision(GLfloat x, GLfloat y, GLfloat z); //Detecta colisão entre a forma e um ponto.
-        bool collision(geometry* ); //Detecta colisão entre duas formas.
+        virtual void setColor(GLfloat r, GLfloat g, GLfloat b); //Setter para a cor do objeto.
+        virtual void resetColor();
+
+
+        virtual bool collision(GLfloat x, GLfloat y, GLfloat z) = 0; //Detecta colisão entre a forma e um ponto.
+        virtual bool collision(geometry* ) = 0; //Detecta colisão entre duas formas.
         
         void print();
 
 
         virtual void draw() = 0; //Método virtual puro para desenho da forma.
+};
+
+
+
+class square : public geometry
+{
+
+    public:
+
+        square(GLenum usage = GL_STATIC_DRAW);
+
+        void draw();
+        void clearVertex();
+        void addStart(GLfloat x, GLfloat y);
+        void updateLength(GLfloat x, GLfloat y);
+
+        bool collision(GLfloat x, GLfloat y, GLfloat z); //Detecta colisão entre a forma e um ponto.
+        bool collision(geometry* other);
+
 };
 
 

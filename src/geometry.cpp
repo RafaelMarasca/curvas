@@ -151,50 +151,6 @@ void geometry::setup()
 }
 
 
-/**
- * @brief Recebe um ponto (x,y,z) e verifica se há colisão entre a forma e o ponto.
- * 
- * @param x : coordenada x do ponto.
- * @param y : coordenada y do ponto.
- * @param z : coordenada z do ponto.
- * @return true : Se há uma colisão entre um dos pontos de controle e o ponto x,y,z.
- * @return false : Caso não haja colisão entre o ponto x,y,z e algum ponto de controle.
- */
-bool geometry::collision(GLfloat x, GLfloat y, GLfloat z)
-{
-    std::vector<GLfloat>::iterator it; //Iterator para um vector de GLfloat
-                                 
-    //Verifica se há colisão entre o ponto e os vértices                                 
-    for(it = this->vertices.begin(); it!= this->vertices.end(); it+=3)
-    {
-       if((std::abs(*it - x) < 0.001f ) && (std::abs(*(it+1) - y) < 0.001f ))
-        return true;
-    }
-                             
-    
-}
-
-/**
- * @brief Verifica colisão entre duas formas
- * 
- * @param other : a forma a se verificar colisão.
- * @return true : Caso haja colisão entre as curvas.
- * @return false : Caso não haja colisão entre as curvas.
- */
-bool geometry::collision(geometry* other)
-{
-    std::vector<GLfloat>::iterator it;
-
-    //Verifica se há colisão entre um dos vértices do outro objeto e a forma atual.        
-    for(it = other->vertices.begin(); it!= other->vertices.end(); it+=3)
-    {
-        if(this->collision(*it, *(it+1), *(it+2)))
-			return true; //colisão detectada.
-    }
- 
-    return false; // Não foi detectada colisão.
-}
-
 
 /**
  * @brief Setter para a cor do objeto
@@ -217,4 +173,132 @@ void geometry::print()
     {
         std::cout<<std::endl<<this->vertices[i]<<" "<<this->vertices[i+1]<<" "<<this->vertices[i+2]<<std::endl;
     }
+}
+
+/**
+ * @brief Recebe um ponto (x,y,z) e verifica se há colisão entre a forma e o ponto.
+ * 
+ * @param x : coordenada x do ponto.
+ * @param y : coordenada y do ponto.
+ * @param z : coordenada z do ponto.
+ * @return true : Se há uma colisão entre um dos pontos de controle e o ponto x,y,z.
+ * @return false : Caso não haja colisão entre o ponto x,y,z e algum ponto de controle.
+ */
+bool square::collision(GLfloat x, GLfloat y, GLfloat z)
+{
+    std::vector<GLfloat>::iterator it; //Iterator para um vector de GLfloat
+    int i = 1; //Variável auxiliar
+
+    //Inicializa o vetor que representa os valores mínimos e máximos das coordenadas x e y da forma
+    std::vector<GLfloat> min_max={std::numeric_limits<float>::max(),std::numeric_limits<float>::lowest(),
+                                 std::numeric_limits<float>::max(),std::numeric_limits<float>::lowest()};
+                                 
+    //Verifica se há colisão entre o ponto e os vértices                                 
+    for(it = this->vertices.begin(); it!= this->vertices.end(); it+=3)
+    {
+       if((std::abs(*it - x) < 0.0000001f ) && (std::abs(*(it+1) - y) < 0.000001f ))
+        return true;
+    }
+                             
+    //Obtém os pontos mínimos e máximos das coordenadas x e y e armazena no vetor min_max
+    for(it = this->vertices.begin(); it!= this->vertices.end(); it++)
+    {
+        if(i%3 == 1)
+        {
+            if(*it<min_max[0])
+                min_max[0] = *it;
+            if(*it>min_max[1])
+                min_max[1] = *it;
+        }else if(i%3 == 2)
+        {
+            if(*it<min_max[2])
+                min_max[2] = *it;
+            if(*it>min_max[3])
+                min_max[3] = *it;
+        }   
+        i++;
+    }
+
+    //verifica se o ponto se encontra dentro dos limites do vetor min_max
+    if(x>min_max[0] && x<min_max[1] && y>min_max[2] && y<min_max[3])
+    {
+        //Sim, o ponto se encontra dentro dos limites(colisão).
+        return true;
+    }else{
+        //Não o ponto não se encontra dentro dos limites (i.e. não há colisão).
+        return false;
+    }         
+}
+
+/**
+ * @brief Verifica colisão entre duas formas
+ * 
+ * @param other : a forma a se verificar colisão.
+ * @return true : Caso haja colisão entre as curvas.
+ * @return false : Caso não haja colisão entre as curvas.
+ */
+bool square::collision(geometry* other)
+{
+    std::vector<GLfloat>::iterator it;
+
+    //Verifica se há colisão entre um dos vértices do outro objeto e a forma atual.        
+    for(it = this->vertices.begin(); it!= this->vertices.end(); it+=3)
+    {
+        if(!(other->collision(*it, *(it+1), *(it+2))))
+			return false; //colisão detectada.
+    }
+ 
+    return true; // Não foi detectada colisão.
+}
+
+void square::draw()
+{
+    geometry::program->use();
+    glUniform3fv(this->colorLoc, 1, &(this->color[0]));
+    glBindVertexArray(this->VAO);
+    glDrawArrays(GL_LINE_LOOP, 0, this->vertices.size()/3);
+}
+
+
+
+void square::updateLength(GLfloat x, GLfloat y)
+{
+    if(this->vertices.size())
+    {
+        //std::cout<<"ATUALIZADO"<<std::endl;
+
+        this->vertices.erase(this->vertices.begin()+3, this->vertices.end());
+        std::vector<GLfloat> coordinates = {x, this->vertices[1], this->vertices[2]};
+        this->addVertex(coordinates);
+        coordinates[1] = y;
+        this->addVertex(coordinates);
+        coordinates[0] = this->vertices[0];
+        this->addVertex(coordinates);
+
+        //for(int i = 0; i<this->vertices.size(); i++)
+          //  std::cout<<this->vertices[i]<<" ";
+        //std::cout<<std::endl;
+    }   
+}
+
+
+void square::addStart(GLfloat x, GLfloat y)
+{
+    std::cout<<"Adicionado"<<std::endl;
+    std::vector<GLfloat> coordinates = {x,y,0.0f};
+    this->clearVertex();
+    this->addVertex(coordinates);
+}
+
+void square::clearVertex()
+{
+    this->vertices.clear();
+}
+
+
+square::square(GLenum usage):geometry(usage){}
+
+void geometry::resetColor()
+{
+    this->setColor(GEOMETRY_R,GEOMETRY_G, GEOMETRY_B);
 }

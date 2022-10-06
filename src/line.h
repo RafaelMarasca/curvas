@@ -20,6 +20,10 @@
  */
 class line : public geometry
 {
+    private:
+        bool collision(GLfloat x, GLfloat y, GLfloat z); //Detecta colisão entre a forma e um ponto.
+        bool collision(geometry* other);
+
     public:
         line(GLenum usage = GL_STATIC_DRAW); //Construtor para a classe line
         line(std::vector<GLfloat> &vertex, GLenum usage = GL_STATIC_DRAW); //Construtor para a classe line
