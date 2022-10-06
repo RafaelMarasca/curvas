@@ -103,7 +103,7 @@ window::window(int width, int height, const char* title, int* argc, char** argv)
     glPointSize(7);
     glEnable(GL_LINE_SMOOTH);
     glLineWidth(2);
-    this->createMenu();
+    //this->createMenu();
 
     //Inicializa o GLEW
     if(glewInit() != GLEW_OK)
@@ -354,8 +354,8 @@ void window::mouseClick(int button, int state,int x, int y)
         if(button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
         {
             if(w->selectedShape){
-              glutAttachMenu(GLUT_RIGHT_BUTTON);  //createMenu();
-            
+              //glutAttachMenu(GLUT_RIGHT_BUTTON);  //createMenu();
+                createMenu();
                 std::cout<<"teste"<<std::endl;
             }
         }
@@ -500,6 +500,7 @@ void window::createMenu()
     glutAddMenuEntry("Desprender", 1);
     glutAddMenuEntry("Mostrar Pontos de Controle", 2);
     glutAddMenuEntry("Esconder Pontos de Controle", 3);
+    glutAttachMenu(GLUT_RIGHT_BUTTON);
 }
 
 
