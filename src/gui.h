@@ -90,6 +90,7 @@ class frame : public guiElement
         int mouseClick(int button, int state, GLfloat xpos, GLfloat ypos);
         void keyPress(int key);
         bool visible();
+        void clear();
         //int keyBoardAction();
 
         std::string getTextInput(int ID);

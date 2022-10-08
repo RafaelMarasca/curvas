@@ -32,12 +32,8 @@
 #define MENU_DEFAULT_G 0.0901f
 #define MENU_DEFAULT_B 0.3411f
 
-#define MENU1 "[1] NOVA B-SPLINE "
-#define MENU2 "[1] MOUSE [2] TECLADO"
-#define MENU3 "[1] CLAMPED [2] UNCLAMPED [3] MOSTRAR PONTOS DE CONTROLE [4] ESCONDER PONTOS DE CONTROLE"
-#define MENU4 "ORDEM DA B-SPLINE: "
-#define MENU5 "QUANTIDADE DE PONTOS DA B-SPLINE: "
-#define MENU6 "PONTOS: "
+typedef enum{NONE= 0, MOUSE = 1, KEYBOARD = 2}inputType;
+typedef enum{HIDDEN = 0, VISIBLE = 1}menuState;
 
 class selectionBox:public square
 {
@@ -77,7 +73,8 @@ class window
         geometry* selectedShape; //Ponteiro para a forma selecionada.
         selectionBox* selBox;
 
-        int waitingMouse; //Flag de espera do mouse.
+        int waitingInput;
+        inputType inType;
         int width,height; //Altura e largura da tela.
         
         //menu* console;
@@ -104,15 +101,25 @@ class window
         void deleteShape(); //Meétodo para deletar uma forma
         void select(std::pair<unsigned int, geometry*>); //Método para selecionar uma forma
         void clearSelection();
+        frame* getMenu();
+        void setMenu(int ID, menuState = VISIBLE);
+        void addSpline(int pointNum, int order, inputType t);
+
+        int getWaiting();
+        void setWaiting(int wait);
+        void setInputType(inputType t);
+
+        static void menuClick0(int);
+        static void menuClick1(int);
 
         static void redisplay(); //Método para requerer o redesenho da tela.
         static void draw(); //Método para desenhar os objetos da cena.
-
+        
         static void mouseClick(int button, int state,int x, int y); //Método chamado ao clicar na tela
         static void keyp(unsigned char, int x, int y); //Método chamado ao pressionar uma tecla
         static void resize(int w, int h); //Método chamado ao redimensionar a tela
         static void mouseMove(int x, int y);
-        static void menuClick(int i);
+        //static void menuClick(int i);
         //static void createMenu();
         //static void splineManagement(int option);
 };

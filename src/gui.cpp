@@ -358,13 +358,13 @@ frame::frame( int vsize, int hsize, int numHorizontal, int numVertical,float gap
     this->setColor(FRAME_R, FRAME_G, FRAME_B);
     this->elements = std::vector<std::vector<guiElement*>> (numVertical, std::vector<guiElement*>());
 }
-
+/*
 void frame::addSubFrame(int vpos, int hpos, int vsize, int hsize, int numHorizontal, int numVertical, int ID, float gap)
 {
     frame* f = new frame(vsize, hsize, numHorizontal, numVertical,gap);
     f->ID = ID;
     this->addElement(vpos, hpos,f);
-}
+}*/
 
 void frame::generate(GLfloat width, GLfloat height, GLfloat xpos, GLfloat ypos)
 {
@@ -375,7 +375,7 @@ void frame::generate(GLfloat width, GLfloat height, GLfloat xpos, GLfloat ypos)
     this->element_w = (this->width-((this->grid_w+1)*this->hGap))/this->grid_w;
     this->generate();
 }
-
+/*
 frame* frame::getSubFrame(int ID)
 {
     std::vector<std::vector<guiElement*>>::iterator it1;
@@ -395,7 +395,7 @@ frame* frame::getSubFrame(int ID)
         }
     }
     return nullptr;
-}
+}*/
 
 void guiElement::onClick(void (*fun) (int))
 {
@@ -428,12 +428,13 @@ std::string frame::getTextInput(int ID)
                     textInput* t = dynamic_cast<textInput*>(*it2);
                     if(t)
                         return t->getText();
+                    else
+                        return std::string();
                 }
             }
         }
     }
-
-    return std::string("falhaaaaaa");
+    return std::string();
 }
 
 void frame::keyPress(int key)
@@ -502,9 +503,8 @@ std::string textInput::getText()
     return this->text;
 }
 
-void frame::hide()
+void frame::clear()
 {
-    this->isVisible = false;
     std::vector<std::vector<guiElement*>>::iterator it1;
     std::vector<guiElement*>::iterator it2; 
 
@@ -518,6 +518,11 @@ void frame::hide()
             }
         }
     }
+}
+
+void frame::hide()
+{
+    this->isVisible = false;
 }
 
 void frame::show()
