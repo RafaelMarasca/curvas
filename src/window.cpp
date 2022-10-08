@@ -17,12 +17,23 @@
 #include<iostream>
 #include<sstream>
 #include<thread>
+#include<string>
 #include<cmath>
 #include"curves.h"
 
 int closeFlag = false; //Inicializa a flag de fechamento
 int inputFlag = 0; //Inicializa a flag de entrada
 int mouseFlag = 0;
+int currentMenu = 1;
+float pixels = 0;
+
+
+
+void teste(int i)
+{
+    std::cout<<"Clicado: "<<i<<std::endl;
+}
+
 
 /**
  * @brief Função chamada ao se pressionar uma tecla
@@ -56,18 +67,25 @@ void window::keyp(unsigned char key, int x, int y)
             }
         break;
 
+
+
         case 32:
-            w->waitingMouse = 4;
+            /*w->waitingMouse = 4;
             w->selectedShapeID  = w->vision->addObject(new bSpline(3));
             if(w->selectedShapeID == 0)
                 std::cout<<"erro 404";
             w->selectedShape = w->vision->getObject(w->selectedShapeID).second;
-            std::cout<<"isso eu fiz";
+            std::cout<<"isso eu fiz";*/
+            if(w->menu->visible())
+                w->menu->hide();
+            else
+                w->menu->show();
+            
         break;
     }
 
-    //if(key>48 && key <52)
-        //pressed_order = int(key-48);
+    if((key>=65)&& (key<=90) || ((key>=48)&& (key<=57))||((key>=97)&& (key<=122)) || key == 8)
+        w->menu->keyPress(key);
 
     glutPostRedisplay(); //Requere que a tela seja redesenhada.
 }
@@ -86,8 +104,8 @@ window::window(int width, int height, const char* title, int* argc, char** argv)
     //Funções de inicialização do GLUT
     glutInit(argc, argv);
     glutInitContextVersion(3,3);
-    glutInitContextProfile(GLUT_CORE_PROFILE);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+    glutInitContextProfile(GLUT_COMPATIBILITY_PROFILE);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
     glutInitWindowSize(width,height);
     glutCreateWindow(title);
     glutDisplayFunc(window::draw);
@@ -103,6 +121,7 @@ window::window(int width, int height, const char* title, int* argc, char** argv)
     glPointSize(7);
     glEnable(GL_LINE_SMOOTH);
     glLineWidth(2);
+    
     //this->createMenu();
 
     //Inicializa o GLEW
@@ -118,9 +137,36 @@ window::window(int width, int height, const char* title, int* argc, char** argv)
     this->height = height; //Inicializa a altura da tela
     this->selectedShape = nullptr; //Inicializa a forma selecionada como NULL (Nenhuma forma selecionada)
     this->selectedShapeID = 0; //Inicializa o ID de forma selecionada como 0 (Nenhuma forma selecionada)
-    this->selectionBox = new square();
-    this->selectionBox->setColor(SELECTION_R,SELECTION_G,SELECTION_B);
+    this->selBox = new selectionBox();
+    this->selBox->setColor(SELECTION_R,SELECTION_G,SELECTION_B);
+    //this->console = new menu(-0.9f,-0.9f);
+    //this->console->setText(MENU1);
+    //pixels = 2.0f/width;
+    //std::cout<<pixels;
+    
+    //this->menu = new frame(1.0f,1.0f, 1, 4,-0.5,0.5);
+
+    this->menu = new frame(1.0f,1.0f, 6, 4,-0.5,0.5);
+   
+    this->menu->addSubFrame(0,0,1,4,1,1,0);
+
+
+    //this->menu->setHGap(0.0f);
+    frame* f = menu->getSubFrame(0);
+    this->menu->addText(0,0,1,4,0,"NOVA B-SPLINE");
+    this->menu->addTextInput(2,0,1,4,1);
+    this->menu->addText(1,0,1,4,2,"Quantidade de Pontos");
+    this->menu->addTextInput(4,0,1,4,3);
+    this->menu->addText(3,0,1,4,4,"Ordem");
+    this->menu->addButton(5,0,1,2,5,"Mouse");
+    this->menu->addButton(5,1,1,2,6,"Teclado");
+    this->menu->addClickFunction(teste);
+    this->menu->generate();
 }
+
+
+
+
 
 /**
  * @brief Destrutor para a classe Window.
@@ -141,7 +187,8 @@ window::~window()
 
     delete this->vision; //Deleta a cena.
 
-    delete this->selectionBox;
+    delete this->selBox;
+    //delete this->console;
 }
 
 
@@ -157,7 +204,11 @@ void window::draw()
     glClear(GL_COLOR_BUFFER_BIT); //Limpa o buffer com a corr de background
     w->updateScene(); //Atualiza a cena
     w->vision->draw(); //Desenha a cena
-    w->selectionBox->draw();
+    w->selBox->draw();
+    w->menu->draw();
+   // w->console->draw();
+
+
     glutSwapBuffers(); //Troca os buffers (Exibe na tela)
 }
 
@@ -167,11 +218,11 @@ void window::draw()
  */
 void window::init()
 {
-    std::thread inputThread = std::thread(&window::input,this); //Cria a thread de entrada de dados
+    //std::thread inputThread = std::thread(&window::input,this); //Cria a thread de entrada de dados
     glutMainLoop(); //Roda o loop principal da janela
     closeFlag = true; //Após o fechamento da janela, seta a flag de fechamento como true.
-    std::cout<<"Aperte Enter para Sair"<<std::endl;
-    inputThread.join(); //Espera a thread de entrada de dados terminar.
+    //std::cout<<"Aperte Enter para Sair"<<std::endl;
+    //inputThread.join(); //Espera a thread de entrada de dados terminar.
 }
 
 /**
@@ -233,7 +284,7 @@ void window::updateScene()
                 
             }else{
                 B->addControlPoint(this->mouseQueue);
-                std::cout<<this->mouseQueue.size()<<std::endl;
+                //std::cout<<this->mouseQueue.size()<<std::endl;
                 this->mouseQueue.clear(); // Limpa a fila do mouse.
 
                 if(!this->waitingMouse)
@@ -273,6 +324,8 @@ void window::mouseClick(int button, int state,int x, int y)
         {
             float xpos, ypos;
 
+            
+
             //Mapeia os cliques das coordenadas da janela para as coordenadas normalizadas
             if(w->width > w->height){
                 xpos =  ((2.0*float(x)/float(w->width)) - 1.0f)*w->aspectRatio;
@@ -282,13 +335,15 @@ void window::mouseClick(int button, int state,int x, int y)
                 ypos =  ((-2.0*float(y)/float(w->height)) + 1.0f)/w->aspectRatio;
             }
 
+            w->menu->mouseClick(button,state,xpos,ypos);
+
             std::vector<GLfloat> coordinates = {xpos, ypos, 0.0f};
 
             if(mouseFlag == 0 && !w->waitingMouse)
             {
                 std::cout<<xpos<<" "<<ypos<<std::endl;
                 mouseFlag = 1;
-                w->selectionBox->addStart(xpos,ypos);
+                w->selBox->addStart(xpos,ypos);
             }
     
             //Verifica se houve colisão entre o clique do mouse e algum objeto da cena
@@ -345,20 +400,20 @@ void window::mouseClick(int button, int state,int x, int y)
             if(mouseFlag == 1 && !w->waitingMouse)
             {
                 mouseFlag = 0;
-                std::pair<unsigned int, geometry*> temp = w->vision->checkCollision(w->selectionBox);
+                std::pair<unsigned int, geometry*> temp = w->vision->checkCollision(w->selBox);
                 w->select(temp);
-                w->selectionBox->clearVertex();
+                w->selBox->clearVertex();
             }
         }
 
-        if(button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
+       /* if(button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
         {
             if(w->selectedShape){
               //glutAttachMenu(GLUT_RIGHT_BUTTON);  //createMenu();
-                createMenu();
+                //createMenu();
                 std::cout<<"teste"<<std::endl;
             }
-        }
+        }*/
 
         glutPostRedisplay(); //Requere que a tela seja redesenhada
     }
@@ -414,7 +469,7 @@ void window::clearSelection()
     this->selectedShape = nullptr;
     this->selectedShapeID = 0;
 
-    glutDetachMenu(GLUT_RIGHT_BUTTON);
+    //glutDetachMenu(GLUT_RIGHT_BUTTON);
 
     glutPostRedisplay(); //Requere que a tela seja redesenhada.
 }
@@ -440,10 +495,12 @@ void window::resize(int newWidth, int newHeight)
     {
         GLfloat aux = GLfloat(newWidth-newHeight)/2.0f;
         glViewport(aux, 0, newHeight, newHeight);
+        pixels = 2.0f/newHeight;
     }else
     {
         GLfloat aux = GLfloat(newHeight-newWidth)/2.0f;
         glViewport(0, aux, newWidth, newWidth);
+        pixels = 2.0f/newWidth;
     }
    
 
@@ -461,7 +518,7 @@ void window::resize(int newWidth, int newHeight)
     }
 
     glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity ();
+    glLoadIdentity();
 
     glutPostRedisplay();
 }
@@ -484,27 +541,27 @@ void window::mouseMove(int x, int y)
             ypos =  ((-2.0*float(y)/float(w->height)) + 1.0f)/w->aspectRatio;
         }
 
-        w->selectionBox->updateLength(xpos,ypos);
+        w->selBox->updateLength(xpos,ypos);
 
         glutPostRedisplay();
     }
 }
 
-
+/*
 void window::createMenu()
 {
     window* w = (window*)glutGetWindowData();
 
-    w->menu = glutCreateMenu(splineManagement);
+    glutCreateMenu(splineManagement);
     glutAddMenuEntry("Prender", 0);
     glutAddMenuEntry("Desprender", 1);
     glutAddMenuEntry("Mostrar Pontos de Controle", 2);
     glutAddMenuEntry("Esconder Pontos de Controle", 3);
     glutAttachMenu(GLUT_RIGHT_BUTTON);
-}
+}*/
 
 
-
+/*
 void window::splineManagement(int option)
 {
     window* w = (window*)glutGetWindowData();
@@ -533,4 +590,100 @@ void window::splineManagement(int option)
         glutPostRedisplay();
     }
     
+}*/
+void selectionBox::draw()
+{
+    geometry::program->use();
+    glUniform3fv(this->colorLoc, 1, &(this->color[0]));
+    glBindVertexArray(this->VAO);
+    glDrawArrays(GL_LINE_LOOP, 0, this->vertices.size()/3);
+}
+
+
+
+void selectionBox::updateLength(GLfloat x, GLfloat y)
+{
+    if(this->vertices.size())
+    {
+        //std::cout<<"ATUALIZADO"<<std::endl;
+
+        this->vertices.erase(this->vertices.begin()+3, this->vertices.end());
+        std::vector<GLfloat> coordinates = {x, this->vertices[1], this->vertices[2]};
+        this->addVertex(coordinates);
+        coordinates[1] = y;
+        this->addVertex(coordinates);
+        coordinates[0] = this->vertices[0];
+        this->addVertex(coordinates);
+
+        //for(int i = 0; i<this->vertices.size(); i++)
+          //  std::cout<<this->vertices[i]<<" ";
+        //std::cout<<std::endl;
+    }   
+}
+
+
+void selectionBox::addStart(GLfloat x, GLfloat y)
+{
+    std::cout<<"Adicionado"<<std::endl;
+    std::vector<GLfloat> coordinates = {x,y,0.0f};
+    this->clearVertex();
+    this->addVertex(coordinates);
+}
+
+void selectionBox::clearVertex()
+{
+    this->vertices.clear();
+}
+
+
+menu::menu(GLfloat xPos, GLfloat yPos)
+{
+    this->xPos = xPos;
+    this->yPos = yPos;
+    this->color = {MENU_DEFAULT_R, MENU_DEFAULT_G, MENU_DEFAULT_B};
+}
+
+void menu::setText(std::string str)
+{
+    this->text = str;
+}
+
+void menu::addChar(char character)
+{
+    this->text.push_back(character);
+}
+
+void menu::deleteChar()
+{
+    if(this->text.size())
+    {
+        this->text.pop_back();
+    }
+}
+
+void menu::setColor(GLfloat r, GLfloat g, GLfloat b)
+{
+    this->color = {MENU_DEFAULT_R, MENU_DEFAULT_G, MENU_DEFAULT_B};
+}
+
+void menu::draw()
+{
+    glUseProgram(0);
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    gluOrtho2D(-1.0f,1.0f,-1.0f,1.0f);
+
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+    glColor4f(this->color[0],this->color[1],this->color[2], 0.4f);
+    glRasterPos2f(this->xPos, this->yPos);
+    glutBitmapString(GLUT_BITMAP_9_BY_15, (unsigned char*)(this->text.c_str()));
+
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
 }

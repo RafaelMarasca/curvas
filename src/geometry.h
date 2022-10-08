@@ -107,11 +107,9 @@ class square : public geometry
     public:
 
         square(GLenum usage = GL_STATIC_DRAW);
+        square(GLfloat width, GLfloat height, GLfloat xPos, GLfloat yPos);
 
         void draw();
-        void clearVertex();
-        void addStart(GLfloat x, GLfloat y);
-        void updateLength(GLfloat x, GLfloat y);
 
         bool collision(GLfloat x, GLfloat y, GLfloat z); //Detecta colisão entre a forma e um ponto.
         bool collision(geometry* other);

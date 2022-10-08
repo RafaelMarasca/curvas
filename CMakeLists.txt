@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.16)
 project(CURVE)
 
 set(PARENT_DIR ${PROJECT_SOURCE_DIR}/..)
-set(GCC_COMPILE_FLAGS "-Wall -pedantic -Wextra")
+set(GCC_COMPILE_FLAGS "-Wall -pedantic -Wextra -g")
 set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${GCC_COMPILE_FLAGS}")
 		
 file(GLOB SOURCES ${PROJECT_SOURCE_DIR}/src/*.cpp)

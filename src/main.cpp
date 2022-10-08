@@ -18,7 +18,7 @@ int main(int argc, char**argv)
     //Try catch para capturar as possíveis exceções geradas pela classe window
     try{
         //Cria uma janela com tamanho inicial 250x250
-        window a(250,250, std::string("Hello Curves").c_str(), &argc, argv);
+        window a(600,600, std::string("Hello Curves").c_str(), &argc, argv);
         //Inicializa a janela e a exibe na tela
         a.init(); 
     }catch(std::string b){

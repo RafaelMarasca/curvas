@@ -230,6 +230,8 @@ bool square::collision(GLfloat x, GLfloat y, GLfloat z)
     }         
 }
 
+
+
 /**
  * @brief Verifica colisão entre duas formas
  * 
@@ -256,11 +258,11 @@ void square::draw()
     geometry::program->use();
     glUniform3fv(this->colorLoc, 1, &(this->color[0]));
     glBindVertexArray(this->VAO);
-    glDrawArrays(GL_LINE_LOOP, 0, this->vertices.size()/3);
+    glDrawArrays(GL_TRIANGLE_FAN, 0, this->vertices.size()/3);
 }
 
 
-
+/*
 void square::updateLength(GLfloat x, GLfloat y)
 {
     if(this->vertices.size())
@@ -279,21 +281,21 @@ void square::updateLength(GLfloat x, GLfloat y)
           //  std::cout<<this->vertices[i]<<" ";
         //std::cout<<std::endl;
     }   
-}
+}*/
 
-
+/*
 void square::addStart(GLfloat x, GLfloat y)
 {
     std::cout<<"Adicionado"<<std::endl;
     std::vector<GLfloat> coordinates = {x,y,0.0f};
     this->clearVertex();
     this->addVertex(coordinates);
-}
-
+}*/
+/*
 void square::clearVertex()
 {
     this->vertices.clear();
-}
+}*/
 
 
 square::square(GLenum usage):geometry(usage){}
@@ -301,4 +303,19 @@ square::square(GLenum usage):geometry(usage){}
 void geometry::resetColor()
 {
     this->setColor(GEOMETRY_R,GEOMETRY_G, GEOMETRY_B);
+}
+
+
+square::square(GLfloat width, GLfloat height, GLfloat xPos, GLfloat yPos)
+{
+    std::vector<GLfloat> aux (12,0.0f);
+    aux[0] = xPos;
+    aux[1] = yPos;
+    aux[3] = xPos + width;
+    aux[4] = yPos;
+    aux[6] = xPos + width;
+    aux[7] = yPos - height;
+    aux[9] = xPos;
+    aux[10] = yPos -height;
+    this->addVertex(aux);
 }
