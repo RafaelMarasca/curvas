@@ -424,6 +424,7 @@ std::string frame::getTextInput(int ID)
             {
                 if((*it2)->getID() == ID)
                 {
+    
                     textInput* t = dynamic_cast<textInput*>(*it2);
                     if(t)
                         return t->getText();
@@ -432,6 +433,7 @@ std::string frame::getTextInput(int ID)
         }
     }
 
+    return std::string("falhaaaaaa");
 }
 
 void frame::keyPress(int key)

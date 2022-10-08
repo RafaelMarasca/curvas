@@ -19,6 +19,7 @@
 #include<atomic>
 #include<string>
 #include<vector>
+#include<map>
 #include<utility>
 #include"gui.h"
 
@@ -46,7 +47,7 @@ class selectionBox:public square
         void addStart(GLfloat x, GLfloat y);
         void updateLength(GLfloat x, GLfloat y);
 };
-
+/*
 class menu
 {
     private:
@@ -63,7 +64,7 @@ class menu
         void deleteChar();
         void draw();
         void setColor(GLfloat r, GLfloat g, GLfloat b);
-};
+};*/
 
 /**
  * @brief Classe window - Define uma abstração para uma janela de desenho.
@@ -81,7 +82,8 @@ class window
         
         //menu* console;
         
-        frame* menu;
+        std::map<int,frame*> menu;
+        int currentMenu;
 
         unsigned int selectedShapeID; //ID da forma selecionada
 
@@ -110,6 +112,7 @@ class window
         static void keyp(unsigned char, int x, int y); //Método chamado ao pressionar uma tecla
         static void resize(int w, int h); //Método chamado ao redimensionar a tela
         static void mouseMove(int x, int y);
+        static void menuClick(int i);
         //static void createMenu();
         //static void splineManagement(int option);
 };
