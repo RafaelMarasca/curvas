@@ -18,8 +18,8 @@
 #define BUTTON_B 0.2510f
 
 #define TOGGLE_ON_R 0.5921f
-#define TOGGLE_ON_G 0.8471f
-#define TOGGLE_ON_B 0.7686f
+#define TOGGLE_ON_G 1.0f
+#define TOGGLE_ON_B 0.5647f
 
 #define TOGGLE_OFF_R 0.8549f
 #define TOGGLE_OFF_G 0.2667f
