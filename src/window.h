@@ -111,6 +111,7 @@ class window
 
         static void menuClick0(int);
         static void menuClick1(int);
+        static void menuClick2(int);
 
         static void redisplay(); //Método para requerer o redesenho da tela.
         static void draw(); //Método para desenhar os objetos da cena.

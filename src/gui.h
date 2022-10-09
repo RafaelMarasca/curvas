@@ -17,6 +17,14 @@
 #define BUTTON_G 0.7922f
 #define BUTTON_B 0.2510f
 
+#define TOGGLE_ON_R 0.5921f
+#define TOGGLE_ON_G 0.8471f
+#define TOGGLE_ON_B 0.7686f
+
+#define TOGGLE_OFF_R 0.8549f
+#define TOGGLE_OFF_G 0.2667f
+#define TOGGLE_OFF_B 0.3137f
+
 #define TEXT_R 1.0f
 #define TEXT_G 1.0f
 #define TEXT_B 1.0f
@@ -81,8 +89,11 @@ class frame : public guiElement
         void hide();
         void generate();
         void generate(GLfloat width, GLfloat height, GLfloat xpos, GLfloat yPos);
-        void addButton(int vpos, int hpos, int vsize,int hsize, int ID, char* text);
-        void addText(int vpos, int hpos, int vsize,int hsize, int ID, char* text);
+
+        void addButton(int vpos, int hpos, int vsize,int hsize, int ID, const char* text);
+        void addButton(int vpos, int hpos, int vsize,int hsize, int ID, const char* text, std::vector<GLfloat>color);
+        void addToggleButton(int vpos, int hpos, int vsize,int hsize, int ID, bool state);
+        void addText(int vpos, int hpos, int vsize,int hsize, int ID, const char* text);
         void addTextInput(int vpos, int hpos, int vsize,int hsize, int ID);
         void addSubFrame(int vpos, int hpos, int vsize, int hsize, int numHorizontal, int numVertical, int ID, float gap = 0.05f);
 
@@ -91,10 +102,11 @@ class frame : public guiElement
         void keyPress(int key);
         bool visible();
         void clear();
-        //int keyBoardAction();
 
         std::string getTextInput(int ID);
-        frame* getSubFrame(int ID);
+        bool getState(int ID);
+        
+        //frame* getSubFrame(int ID);
         
         
 };
@@ -103,24 +115,25 @@ class frame : public guiElement
 class button : public guiElement
 {
     private:
-        char* text;
+        std::string text;
         std::vector<GLfloat> color;
 
     public:
-        button(int vsize,int hsize, int ID, char* text, GLfloat color[4]);
-        button(int vsize,int hsize, int ID, char* text);
+        button(int vsize,int hsize, int ID, const char* text,std::vector<GLfloat>color);
+        button(int vsize,int hsize, int ID, const char* text);
+        void setText(const char*);
         void draw();
 };
 
 class textDisp : public guiElement
 {
     private:
-        char* text;
+        std::string text;
         std::vector<GLfloat> textColor;
 
     public:
-        textDisp(int vsize,int hsize, int ID, char* text, GLfloat color[4]);
-        textDisp(int vsize,int hsize, int ID, char* text);
+        textDisp(int vsize,int hsize, int ID, const char* text, std::vector<GLfloat>color);
+        textDisp(int vsize,int hsize, int ID, const char* text);
         void onClick(functionPtr fun);
         void setTextColor(GLfloat r, GLfloat g, GLfloat b);
         void draw();
@@ -142,6 +155,18 @@ class textInput : public guiElement
         void setClicked(bool state);
         void clear();
         std::string getText();
+};
+
+class toggleButton : public button
+{
+    private:
+        bool state;
+    public:
+        toggleButton(int vsize,int hsize, int ID,bool state);
+        bool getState();
+        void setState(bool state);
+        void onClick(functionPtr fun);
+        void toogle();
 };
 
 

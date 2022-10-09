@@ -99,11 +99,8 @@ void window::menuClick1(int i)
         {
             case 6:
             {
-
                 std::string xStr = (w->getMenu())->getTextInput(2);
                 std::string yStr = (w->getMenu())->getTextInput(4);
-
-                
 
                 if(xStr.size()!= 0 && yStr.size()!= 0)
                 {
@@ -132,17 +129,53 @@ void window::menuClick1(int i)
                     }
                 }
             }break;
+        
+            case 5:
+                if(w->waitingInput)
+                {
+                    w->waitingInput = 0;
+                    w->vision->removeObject(w->selectedShapeID);
+                }
+                w->clearSelection(); //Desseleciona os objetos
+            break;
         }
     }
 }
 
 
-void window::addSpline(int pointNum, int order,inputType t)
+void window::menuClick2(int ID)
+{
+    window* w = (window*)glutGetWindowData(); //Obtém os dados da janela
+    if(w)
+    {
+        if(w->selectedShape)
+        {
+            switch(ID)
+            {
+                case 2:
+                {
+                    bSpline* b = dynamic_cast<bSpline*>(w->selectedShape);
+                    b->setControlPointsVisibility((w->getMenu())->getState(ID));
+                }break;
+                
+                case 4:
+                {
+                    bSpline* b = dynamic_cast<bSpline*>(w->selectedShape);
+                    if((w->getMenu())->getState(ID))
+                        b->makeClamped();
+                    else
+                        b->makeUnclamped();
+                }break;
+            }
+        }
+    }
+}
+
+void window::addSpline(int pointNum, int order, inputType t)
 {
     if(pointNum < order)
-    {
         throw std::string("IMPOSSIVEL!!!");
-    }
+    
     this->inType = t;
     this->waitingInput = pointNum;
     this->selectedShapeID  = this->vision->addObject(new bSpline(order));
@@ -176,9 +209,24 @@ frame* newAddMenu()
     menu->addTextInput(1,1,1,1,2);
     menu->addText(1,2,1,1,3,"Y");
     menu->addTextInput(1,3,1,1,4);
-    menu->addButton(3,0,1,2,5,"Cancelar");
-    menu->addButton(3,1,1,2,6,"Adicionar");
+    menu->addButton(3,0,1,2,6,"Cancelar");
+    menu->addButton(3,1,1,2,5,"Adicionar");
     menu->addClickFunction(window::menuClick1);
+    menu->generate();
+
+    return menu;
+}
+
+frame* newOptMenu()
+{
+    frame* menu = new frame(0.5f,1.0f, 3, 4,-0.5,0.5);
+
+    menu->addText(0,0,1,4,0,"MODIFICAR CURVA");
+    menu->addText(1,0,1,3,1,"Mostrar PTS de Controle");
+    menu->addToggleButton(1,1,1,1,2,true);
+    menu->addText(2,0,1,3,3,"Prender B-Spline");
+    menu->addToggleButton(2,1,1,1,4,true);
+    menu->addClickFunction(window::menuClick2);
     menu->generate();
 
     return menu;
@@ -215,20 +263,28 @@ void window::keyp(unsigned char key, int x, int y)
         case 127:
             try
             {
-                //Deleta a forma selecionada
-                w->deleteShape();
+                w->deleteShape(); //Deleta a forma selecionada
             }catch(std::string s)
             {
                 std::cout<<s<<std::endl;
             }
         break;
 
+        //Tecla Espaço
         case 32:
             if(w->menu[w->currentMenu]->visible())
                 w->menu[w->currentMenu]->hide();
             else
                 w->menu[w->currentMenu]->show();
         break;
+
+        //Tecla ,
+        case 44:
+            if(w->selectedShape && !w->waitingInput)
+                w->setMenu(2);
+
+        break;
+
     }
 
     if((key>=65)&& (key<=90) || ((key>=48)&& (key<=57))||((key>=97)&& (key<=122)) || key == 8 || key ==46 ||key==45)
@@ -290,6 +346,7 @@ window::window(int width, int height, const char* title, int* argc, char** argv)
     this->selBox->setColor(SELECTION_R,SELECTION_G,SELECTION_B);
     this->menu[0] = newSplineMenu();
     this->menu[1] = newAddMenu();
+    this->menu[2] = newOptMenu();
     this->currentMenu = 0;
 }
 
@@ -593,7 +650,9 @@ void window::select(std::pair<unsigned int, geometry*> obj)
     this->selectedShapeID = obj.first;
     
     if(obj.second == nullptr)
-        glutDetachMenu(GLUT_RIGHT_BUTTON);
+        this->setMenu(0,HIDDEN);
+    else
+        this->setMenu(2,HIDDEN);
 
     glutPostRedisplay(); //Requere que a tela seja redesenhada.
 }
@@ -602,6 +661,8 @@ void window::clearSelection()
 {
     this->selectedShape = nullptr;
     this->selectedShapeID = 0;
+
+    this->setMenu(0,HIDDEN);
 
     //glutDetachMenu(GLUT_RIGHT_BUTTON);
 
@@ -635,7 +696,6 @@ void window::resize(int newWidth, int newHeight)
         glViewport(0, aux, newWidth, newWidth);
     }
    
-
     //Inicializa o sistema de coordenadas para a projeção ortogonal
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -679,50 +739,6 @@ void window::mouseMove(int x, int y)
     }
 }
 
-/*
-void window::createMenu()
-{
-    window* w = (window*)glutGetWindowData();
-
-    glutCreateMenu(splineManagement);
-    glutAddMenuEntry("Prender", 0);
-    glutAddMenuEntry("Desprender", 1);
-    glutAddMenuEntry("Mostrar Pontos de Controle", 2);
-    glutAddMenuEntry("Esconder Pontos de Controle", 3);
-    glutAttachMenu(GLUT_RIGHT_BUTTON);
-}*/
-
-
-/*
-void window::splineManagement(int option)
-{
-    window* w = (window*)glutGetWindowData();
-    
-    if(w->selectedShape)
-    {
-        bSpline *B = dynamic_cast<bSpline *>(w->selectedShape);;
-        switch (option)
-        {
-        case 0:
-            B->makeClamped();
-            break;
-
-        case 1:
-            B->makeUnclamped();
-            break;
-
-        case 2:
-            B->setControlPointsVisibility(true);
-            break;
-
-        case 3:
-            B->setControlPointsVisibility(false);
-            break;
-        }
-        glutPostRedisplay();
-    }
-    
-}*/
 void selectionBox::draw()
 {
     geometry::program->use();
@@ -737,8 +753,6 @@ void selectionBox::updateLength(GLfloat x, GLfloat y)
 {
     if(this->vertices.size())
     {
-        //std::cout<<"ATUALIZADO"<<std::endl;
-
         this->vertices.erase(this->vertices.begin()+3, this->vertices.end());
         std::vector<GLfloat> coordinates = {x, this->vertices[1], this->vertices[2]};
         this->addVertex(coordinates);
@@ -747,9 +761,6 @@ void selectionBox::updateLength(GLfloat x, GLfloat y)
         coordinates[0] = this->vertices[0];
         this->addVertex(coordinates);
 
-        //for(int i = 0; i<this->vertices.size(); i++)
-          //  std::cout<<this->vertices[i]<<" ";
-        //std::cout<<std::endl;
     }   
 }
 
@@ -798,55 +809,3 @@ void window::setInputType(inputType t)
 {
     this->inType = t;
 }
-
-/*menu::menu(GLfloat xPos, GLfloat yPos)
-{
-    this->xPos = xPos;
-    this->yPos = yPos;
-    this->color = {MENU_DEFAULT_R, MENU_DEFAULT_G, MENU_DEFAULT_B};
-}
-
-void menu::setText(std::string str)
-{
-    this->text = str;
-}
-
-void menu::addChar(char character)
-{
-    this->text.push_back(character);
-}
-
-void menu::deleteChar()
-{
-    if(this->text.size())
-    {
-        this->text.pop_back();
-    }
-}
-
-void menu::setColor(GLfloat r, GLfloat g, GLfloat b)
-{
-    this->color = {MENU_DEFAULT_R, MENU_DEFAULT_G, MENU_DEFAULT_B};
-}
-
-void menu::draw()
-{
-    glUseProgram(0);
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
-    glLoadIdentity();
-    gluOrtho2D(-1.0f,1.0f,-1.0f,1.0f);
-
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadIdentity();
-    glColor4f(this->color[0],this->color[1],this->color[2], 0.4f);
-    glRasterPos2f(this->xPos, this->yPos);
-    glutBitmapString(GLUT_BITMAP_9_BY_15, (unsigned char*)(this->text.c_str()));
-
-    glMatrixMode(GL_MODELVIEW);
-    glPopMatrix();
-
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
-}*/

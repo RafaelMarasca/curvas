@@ -4,6 +4,7 @@
 #include<GL/freeglut.h>
 #include<GL/glew.h>
 #include<vector>
+#include<string>
 #include<iostream>
 
 
@@ -224,11 +225,11 @@ void button::draw()
     glLoadIdentity();
     glColor4f(0.0f,0.0f,0.0f, 1.0f);
 
-    int length = glutBitmapLength(GLUT_BITMAP_9_BY_15, (unsigned char*)(this->text));
+    int length = glutBitmapLength(GLUT_BITMAP_9_BY_15, (unsigned char*)(this->text.c_str()));
     
     glRasterPos2f(this->xPos + ((this->width)-(length*0.00333f))/2.0, this->yPos-this->height/2);
 
-    glutBitmapString(GLUT_BITMAP_9_BY_15, (unsigned char*)(this->text));
+    glutBitmapString(GLUT_BITMAP_9_BY_15, (unsigned char*)(this->text.c_str()));
 
     glMatrixMode(GL_MODELVIEW);
     glPopMatrix();
@@ -242,20 +243,32 @@ void guiElement::draw()
     this->square::draw();
 }
 
-void frame::addButton(int vpos, int hpos, int vsize,int hsize, int ID, char* text)
+void frame::addButton(int vpos, int hpos, int vsize,int hsize, int ID, const char* text)
 {
     button* b = new button(vsize, hsize, ID, text);
     this->addElement(vpos,hpos,b);
 }
 
-button::button(int vsize,int hsize, int ID, char* text):guiElement(hsize, vsize, ID)
+void frame::addToggleButton(int vpos, int hpos, int vsize,int hsize, int ID, bool initialState)
+{   
+    toggleButton* t = new toggleButton(vsize, hsize, ID, initialState);
+    this->addElement(vpos,hpos,t);
+}
+
+button::button(int vsize,int hsize, int ID, const char* text):guiElement(hsize, vsize, ID)
 {
     this->text = text;
     this->setColor(BUTTON_R, BUTTON_G, BUTTON_B);
 }
 
+button::button(int vsize,int hsize, int ID, const char* text, std::vector<GLfloat>color):guiElement(hsize, vsize, ID)
+{
+    this->text = text;
+    this->setColor(color[0],color[1],color[2]);
+}
 
-textDisp::textDisp(int vsize,int hsize, int ID, char* text):guiElement(hsize, vsize, ID)
+
+textDisp::textDisp(int vsize,int hsize, int ID, const char* text):guiElement(hsize, vsize, ID)
 {
     this->text = text;
     this->setColor(FRAME_R, FRAME_G, FRAME_B);
@@ -282,11 +295,11 @@ void textDisp::draw()
     glLoadIdentity();
     glColor4f(this->textColor[0],this->textColor[1],this->textColor[2], 1.0f);
 
-    int length = glutBitmapLength(GLUT_BITMAP_9_BY_15, (unsigned char*)(this->text));
+    int length = glutBitmapLength(GLUT_BITMAP_9_BY_15, (unsigned char*)(this->text.c_str()));
 
     glRasterPos2f(this->xPos + ((this->width)-(length*0.00333f))/2.0, this->yPos-this->height/2);
 
-    glutBitmapString(GLUT_BITMAP_9_BY_15, (unsigned char*)(this->text));
+    glutBitmapString(GLUT_BITMAP_9_BY_15, (unsigned char*)(this->text.c_str()));
 
     glMatrixMode(GL_MODELVIEW);
     glPopMatrix();
@@ -296,7 +309,7 @@ void textDisp::draw()
 
 }
 
-void frame::addText(int vpos, int hpos, int vsize,int hsize, int ID, char* text)
+void frame::addText(int vpos, int hpos, int vsize,int hsize, int ID, const char* text)
 {
     textDisp* t = new textDisp(vsize, hsize, ID, text);
     this->addElement(vpos,hpos,t);
@@ -544,3 +557,71 @@ void textInput::clear()
     this->guiElement::clear();
     this->text.clear();
 }
+
+
+toggleButton::toggleButton(int vsize,int hsize, int ID,bool state):button(vsize, hsize, ID, "")
+{
+    this->setState(state);
+}
+
+bool toggleButton::getState()
+{
+    return this->state;
+}
+
+void toggleButton::setState(bool state)
+{
+    if(state)
+    {
+        this->setText("ON");
+        this->setColor(TOGGLE_ON_R,TOGGLE_ON_G,TOGGLE_ON_B);
+    }else
+    {
+        this->setText("OFF");
+        this->setColor(TOGGLE_OFF_R,TOGGLE_OFF_G,TOGGLE_OFF_B);
+    }
+    this->state = state;
+}
+
+void toggleButton::toogle()
+{
+    this->setState(!this->state);
+}
+
+void toggleButton::onClick(functionPtr fun)
+{
+    this->toogle();
+    fun(this->ID);
+}
+
+void button::setText(const char* text)
+{
+    this->text = text;
+}
+
+bool frame::getState(int ID)
+{
+    std::vector<std::vector<guiElement*>>::iterator it1;
+    std::vector<guiElement*>::iterator it2;
+
+    for(it1 = this->elements.begin(); it1!= this->elements.end(); it1++)
+    {
+        for(it2 = (*it1).begin(); it2!= (*it1).end(); it2++)
+        {
+            if((*it2)!= nullptr)
+            {
+                if((*it2)->getID() == ID)
+                {
+    
+                    toggleButton* t = dynamic_cast<toggleButton*>(*it2);
+                    if(t)
+                        return t->getState();
+                    else
+                        return false;
+                }
+            }
+        }
+    }
+    return false;
+}
+
