@@ -104,6 +104,16 @@ void bSpline::addControlPoint(std::vector<GLfloat>& newControlPoint)
     this->controlLine->addVertex(newControlPoint);
 }
 
+void bSpline::addControlPoint(GLfloat x, GLfloat y, GLfloat z)
+{
+    this->controlPoints.push_back(x);
+    this->controlPoints.push_back(y);
+    this->controlPoints.push_back(z);
+
+    std::vector<GLfloat> newPoint = {x,y,z};
+    this->controlLine->addVertex(newPoint);
+}
+
 
 
 bSpline::bSpline(int order, GLenum usage /*= GL_DYNAMIC_DRAW*/) : geometry(usage)

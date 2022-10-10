@@ -22,9 +22,10 @@
 #include<cmath>
 #include"curves.h"
 
-int closeFlag = false; //Inicializa a flag de fechamento
-int inputFlag = 0; //Inicializa a flag de entrada
+//int closeFlag = false; //Inicializa a flag de fechamento
+//int inputFlag = 0; //Inicializa a flag de entrada
 int mouseFlag = 0;
+
 
 
 void window::menuClick0(int i)
@@ -47,15 +48,13 @@ void window::menuClick0(int i)
 
                     if(pointNum <= order)
                     {
-                        throw std::string("IMPOSSIVEL!!!");
+                        w->showPopUp("Numero de Pontos <= Ordem");
+                    }else
+                    {
+                        w->getMenu()->clear();
+                        w->getMenu()->hide();
+                        w->addSpline(pointNum, order,MOUSE);
                     }
-
-                    std::cout<<order<<std::endl;;
-                    std::cout<<pointNum<<std::endl;
-
-                    w->getMenu()->clear();
-                    w->getMenu()->hide();
-                    w->addSpline(pointNum, order,MOUSE);
                 }
             }break;
         
@@ -71,20 +70,17 @@ void window::menuClick0(int i)
                     order = stoi(orderStr);
                     pointNum = stoi(pointNumStr);
 
-                    if(pointNum < order)
+                    if(pointNum <= order)
                     {
-                        throw std::string("IMPOSSIVEL!!!");
-                    }
-
-                    std::cout<<order<<std::endl;;
-                    std::cout<<pointNum<<std::endl;
-
-                    w->getMenu()->clear();
-                    w->getMenu()->hide();
-                    w->addSpline(pointNum,order,KEYBOARD);
-                    w->setMenu(1); 
+                        w->showPopUp("Numero de Pontos <= Ordem");
+                    }else
+                    {
+                        w->getMenu()->clear();
+                        w->getMenu()->hide();
+                        w->addSpline(pointNum,order,KEYBOARD);
+                        w->setMenu(1);
+                    } 
                 }
-
             }break;
         }
     }
@@ -97,7 +93,7 @@ void window::menuClick1(int i)
     {
         switch(i)
         {
-            case 6:
+            case 5:
             {
                 std::string xStr = (w->getMenu())->getTextInput(2);
                 std::string yStr = (w->getMenu())->getTextInput(4);
@@ -109,8 +105,11 @@ void window::menuClick1(int i)
                     x = stof(xStr);
                     y = stof(yStr);
 
-                    std::cout<<x<<","<<y<<std::endl;
-
+                    if(std::fabs(x)>1  || std::fabs(y)>1)
+                    {
+                         w->showPopUp("O Desenho Ficara Fora da Tela!");
+                    }
+                    
                     if(!(w->vision->checkCollision(x,y).first))
                     {
                         bSpline* b = dynamic_cast<bSpline*>(w->selectedShape);
@@ -126,11 +125,13 @@ void window::menuClick1(int i)
                             w->setInputType(NONE);
                             w->setMenu(0,HIDDEN);
                         }
+                    }else{
+                        w->showPopUp("Ponto Repetido!");
                     }
                 }
             }break;
         
-            case 5:
+            case 6:
                 if(w->waitingInput)
                 {
                     w->waitingInput = 0;
@@ -171,6 +172,21 @@ void window::menuClick2(int ID)
     }
 }
 
+
+void window::menuClick3(int ID)
+{
+    window* w = (window*)glutGetWindowData(); //Obtém os dados da janela
+    if(w)
+    {
+       if(ID == 0)
+       {
+            w->closePopUp();
+       }
+    }
+}
+
+
+
 void window::addSpline(int pointNum, int order, inputType t)
 {
     if(pointNum < order)
@@ -202,7 +218,7 @@ frame* newSplineMenu()
 
 frame* newAddMenu()
 {
-    frame* menu = new frame(0.5f,1.0f, 4, 4,-0.5,0.5);
+    frame* menu = new frame(0.5f,1.0f, 4, 4,-0.5,0.25);
 
     menu->addText(0,0,1,4,0,"ADICIONAR PONTOS");
     menu->addText(1,0,1,1,1,"X");
@@ -219,7 +235,7 @@ frame* newAddMenu()
 
 frame* newOptMenu()
 {
-    frame* menu = new frame(0.5f,1.0f, 3, 4,-0.5,0.5);
+    frame* menu = new frame(0.5f,1.0f, 3, 4,-0.5,0.25);
 
     menu->addText(0,0,1,4,0,"MODIFICAR CURVA");
     menu->addText(1,0,1,3,1,"Mostrar PTS de Controle");
@@ -227,6 +243,17 @@ frame* newOptMenu()
     menu->addText(2,0,1,3,3,"Prender B-Spline");
     menu->addToggleButton(2,1,1,1,4,true);
     menu->addClickFunction(window::menuClick2);
+    menu->generate();
+
+    return menu;
+}
+
+frame* newPopUp()
+{
+     frame* menu = new frame(0.5f,1.0f, 2, 4,-0.5,0.25,-1,0.1);
+    menu->addButton(1,1,1,2,0,"OK");
+    menu->addText(0,0,1,4,1,"LOREM IPSUM AMET");
+    menu->addClickFunction(window::menuClick3);
     menu->generate();
 
     return menu;
@@ -315,7 +342,7 @@ window::window(int width, int height, const char* title, int* argc, char** argv)
     glutMouseFunc(window::mouseClick);
     glutMotionFunc(window::mouseMove);
     glutKeyboardFunc(keyp);
-    glutIdleFunc(window::redisplay);
+    //glutIdleFunc(window::redisplay);
     glutReshapeFunc(window::resize);
     glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE,
                     GLUT_ACTION_GLUTMAINLOOP_RETURNS);
@@ -347,6 +374,7 @@ window::window(int width, int height, const char* title, int* argc, char** argv)
     this->menu[0] = newSplineMenu();
     this->menu[1] = newAddMenu();
     this->menu[2] = newOptMenu();
+    this->menu[3] = newPopUp();
     this->currentMenu = 0;
 }
 
@@ -389,7 +417,7 @@ void window::draw()
 
     glClearColor(0.784f,0.784f,0.784f, 1.0f); //Determina a cor de limpeza do buffer
     glClear(GL_COLOR_BUFFER_BIT); //Limpa o buffer com a corr de background
-    w->updateScene(); //Atualiza a cena
+    //w->updateScene(); //Atualiza a cena
     w->vision->draw(); //Desenha a cena
     w->selBox->draw();
     w->menu[w->currentMenu]->draw();
@@ -403,48 +431,7 @@ void window::draw()
  */
 void window::init()
 {
-    //std::thread inputThread = std::thread(&window::input,this); //Cria a thread de entrada de dados
     glutMainLoop(); //Roda o loop principal da janela
-    closeFlag = true; //Após o fechamento da janela, seta a flag de fechamento como true.
-    //std::cout<<"Aperte Enter para Sair"<<std::endl;
-    //inputThread.join(); //Espera a thread de entrada de dados terminar.
-}
-
-/**
- * @brief Método de entrada de dados
- * 
- */
-void window::input()
-{
-    //Roda enquanto janela de desenho não foi fechada
-    while(!(closeFlag))
-    {
-        std::string in;
-        std::getline(std::cin, in);
-
-        std::string temp;
-        std::stringstream ss(in);
-
-        //Adiciona a entrada de usuário ao buffer da janela
-        while(ss >> temp)
-            this->buffer.push_back(temp);
-        inputFlag = true; //Seta a flag de dados disponíveis como true
-    } 
-}
-
-
-/**
- * @brief Requere o redesenho da tela
- * 
- */
-void window::redisplay()
-{
-    //Se há dados no buffer de entrada, requere que a função de update seja executada.
-    if(inputFlag)
-    {
-        glutPostRedisplay();
-        inputFlag = false;
-    }
 }
 
 
@@ -454,6 +441,7 @@ void window::redisplay()
  */
 void window::updateScene()
 {
+    
 
     if(this->mouseQueue.size())
     {
@@ -464,14 +452,11 @@ void window::updateScene()
             
             if((this->vision->checkCollision(this->mouseQueue[0], this->mouseQueue[1])).first)
             {
-                this->mouseQueue.clear(); // Limpa a fila do mouse.
-                this->waitingInput = 0;
-                
+                this->showPopUp("Ponto Repetido!");      
             }else{
-                B->addControlPoint(this->mouseQueue);
-                //std::cout<<this->mouseQueue.size()<<std::endl;
-                this->mouseQueue.clear(); // Limpa a fila do mouse.
 
+                B->addControlPoint(this->mouseQueue);
+                this->mouseQueue.clear(); // Limpa a fila do mouse.
                 if(!(this->waitingInput))
                 {
                     bSpline* B = dynamic_cast<bSpline*> (this->selectedShape);
@@ -480,13 +465,6 @@ void window::updateScene()
             }   
         }
     }
-
-    /*else if(buffer.size()) //Caso haja entrada do usuário disponível para ser consumida, parsea o buffer
-    {  
-        
-        this->buffer.clear();
-        std::cout<<s<<std::endl;
-    } */
 }
 
 
@@ -526,55 +504,37 @@ void window::mouseClick(int button, int state,int x, int y)
 
                 if(mouseFlag == 0 && !w->waitingInput)
                 {
-                    std::cout<<xpos<<" "<<ypos<<std::endl;
                     mouseFlag = 1;
                     w->selBox->addStart(xpos,ypos);
                 }
 
-                
-        
-                //Verifica se houve colisão entre o clique do mouse e algum objeto da cena
-                //std::pair<unsigned int, geometry*> temp = w->vision->checkCollision(xpos,ypos);
-
-                /*if(temp.second) //Se houve colisão com uma forma
-                {
-                    if(w->waitingMouse) //Caso estejam sendo selecionados os vértices de uma forma, invalida a entrada
-                    {
-                        w->waitingMouse = 0;
-                        w->selectedShape = nullptr;
-                        w->selectedShapeID = 0;
-
-                        std::cout<< "Ponto invalido (Colisao detectada)." << std::endl;
-                        return;
-                    }else //Caso não estejam sendo selecionados os vértices de uma forma
-                    {
-                        std::cout<<"Selecionado"<<std::endl;
-                        w->select(temp); //Seleciona a forma.
-                    }
-                }else if(w->waitingMouse){ //Se não houve colisão, adiciona o clique à fila de cliques
-                    
-                    w->mouseQueue.push_back(GLfloat(xpos));
-                    w->mouseQueue.push_back(GLfloat(ypos));
-                    w->mouseQueue.push_back(0.0f);
-                    w->waitingMouse--;
-                }else{
-                    w->select(temp); //Caso não haja colisão e não estejam sendo selecionados
-                                    //os vértices de uma forma, limpa a seleção atual
-                }*/
-
                 if(w->waitingInput && w->inType == MOUSE)
                 { 
-                    w->mouseQueue.push_back(GLfloat(xpos));
-                    w->mouseQueue.push_back(GLfloat(ypos));
-                    w->mouseQueue.push_back(0.0f);
-                    w->waitingInput--;
+                        if(w->selectedShape)
+                        {
+                            bSpline* B = dynamic_cast <bSpline*> (w->selectedShape);
+                            
+                            if((w->vision->checkCollision(xpos, ypos)).first)
+                            {
+                                w->showPopUp("Ponto Repetido!");      
+
+                            }else{
+                                B->addControlPoint(xpos,ypos,0.0f);
+                                w->waitingInput--;
+                                //w->mouseQueue.clear(); // Limpa a fila do mouse.
+                                if(!(w->waitingInput))
+                                {
+                                    bSpline* B = dynamic_cast<bSpline*> (w->selectedShape);
+                                    B->generate();
+                                }
+                            }   
+                        }
                 }
             }
         }
 
         if(button == GLUT_LEFT_BUTTON && state == GLUT_UP)
         {
-            std::cout<<"cheguei pra ficar antes"<<std::endl;
             float xpos, ypos;
 
             //Mapeia os cliques das coordenadas da janela para as coordenadas normalizadas
@@ -591,22 +551,11 @@ void window::mouseClick(int button, int state,int x, int y)
                 mouseFlag = 0;
                 std::pair<unsigned int, geometry*> temp = w->vision->checkCollision(w->selBox);
                 w->select(temp);
-                std::cout<<"cheguei pra ficar"<<std::endl;
                 w->selBox->clearVertex();
             }
         }
 
-        /* if(button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
-            {
-                if(w->selectedShape){
-                //glutAttachMenu(GLUT_RIGHT_BUTTON);  //createMenu();
-                    //createMenu();
-                    std::cout<<"teste"<<std::endl;
-                }
-            }*/
-
-            glutPostRedisplay(); //Requere que a tela seja redesenhada
-            
+        glutPostRedisplay(); //Requere que a tela seja redesenhada    
     }
 }
 
@@ -767,7 +716,6 @@ void selectionBox::updateLength(GLfloat x, GLfloat y)
 
 void selectionBox::addStart(GLfloat x, GLfloat y)
 {
-    std::cout<<"Adicionado"<<std::endl;
     std::vector<GLfloat> coordinates = {x,y,0.0f};
     this->clearVertex();
     this->addVertex(coordinates);
@@ -808,4 +756,24 @@ void window::setWaiting(int wait)
 void window::setInputType(inputType t)
 {
     this->inType = t;
+}
+
+void window::showPopUp(char* text)
+{
+    
+    this->tempMenu.first = currentMenu;
+    this->tempMenu.second = this->menu[this->currentMenu]->visible();  
+    this->setMenu(3);
+    textDisp* t = dynamic_cast<textDisp*>(this->menu[3]->getElement(1));
+    
+    if(t)
+        t->setText(text);
+}
+
+void window::closePopUp()
+{
+    if(this->tempMenu.second)
+        this->setMenu(this->tempMenu.first, VISIBLE);
+    else
+        this->setMenu(this->tempMenu.first, HIDDEN);
 }

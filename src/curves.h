@@ -40,6 +40,7 @@ class bSpline : public geometry
         bool collision(GLfloat x, GLfloat y, GLfloat z);
 
         void addControlPoint(std::vector<GLfloat>& newControlPoint);
+        void addControlPoint(GLfloat x, GLfloat y, GLfloat z);
         void generate();
         void setColor(GLfloat r, GLfloat g, GLfloat b);
         void resetColor();

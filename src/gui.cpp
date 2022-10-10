@@ -362,7 +362,7 @@ void textInput::draw()
 }
 
 
-frame::frame( int vsize, int hsize, int numHorizontal, int numVertical,float gap) : guiElement(hsize,vsize,-1)
+/*frame::frame( int vsize, int hsize, int numHorizontal, int numVertical,float gap) : guiElement(hsize,vsize,-1)
 {
     this->grid_w= numHorizontal;
     this->grid_h = numVertical;
@@ -370,7 +370,7 @@ frame::frame( int vsize, int hsize, int numHorizontal, int numVertical,float gap
     this->clickFunction = nullptr;
     this->setColor(FRAME_R, FRAME_G, FRAME_B);
     this->elements = std::vector<std::vector<guiElement*>> (numVertical, std::vector<guiElement*>());
-}
+}*/
 /*
 void frame::addSubFrame(int vpos, int hpos, int vsize, int hsize, int numHorizontal, int numVertical, int ID, float gap)
 {
@@ -426,29 +426,14 @@ void textDisp::onClick(functionPtr fun)
 
 std::string frame::getTextInput(int ID)
 {
-    std::vector<std::vector<guiElement*>>::iterator it1;
-    std::vector<guiElement*>::iterator it2;
-
-    for(it1 = this->elements.begin(); it1!= this->elements.end(); it1++)
-    {
-        for(it2 = (*it1).begin(); it2!= (*it1).end(); it2++)
-        {
-            if((*it2)!= nullptr)
-            {
-                if((*it2)->getID() == ID)
-                {
-    
-                    textInput* t = dynamic_cast<textInput*>(*it2);
-                    if(t)
-                        return t->getText();
-                    else
-                        return std::string();
-                }
-            }
-        }
-    }
-    return std::string();
+    textInput* t = dynamic_cast<textInput*>(this->getElement(ID));
+    if(t)
+        return t->getText();
+    else
+        return std::string();
 }
+
+
 
 void frame::keyPress(int key)
 {
@@ -464,7 +449,6 @@ void frame::keyPress(int key)
                 if((*it2)!= nullptr)
                 {
                     (*it2)->onKeyPress(key);   
-                    std::cout<<"tecla: "<<key<<std::endl; 
                 }
             }
         }
@@ -599,7 +583,7 @@ void button::setText(const char* text)
     this->text = text;
 }
 
-bool frame::getState(int ID)
+guiElement* frame::getElement(int ID)
 {
     std::vector<std::vector<guiElement*>>::iterator it1;
     std::vector<guiElement*>::iterator it2;
@@ -612,16 +596,31 @@ bool frame::getState(int ID)
             {
                 if((*it2)->getID() == ID)
                 {
-    
-                    toggleButton* t = dynamic_cast<toggleButton*>(*it2);
-                    if(t)
-                        return t->getState();
-                    else
-                        return false;
+                    return (*it2);
                 }
             }
         }
     }
-    return false;
+    return nullptr;
+}
+
+
+bool frame::getState(int ID)
+{
+    toggleButton* t = dynamic_cast<toggleButton*>(this->getElement(ID));
+    
+    if(t)
+    {
+        return t->getState();
+    }else
+    {
+        return false;
+    }
+}
+
+
+void textDisp::setText(const char* text)
+{
+    this->text = text;
 }
 

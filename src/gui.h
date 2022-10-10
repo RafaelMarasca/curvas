@@ -78,8 +78,8 @@ class frame : public guiElement
         void addElement(int vPos, int hPos, guiElement* element);
 
     public:
-        frame(GLfloat width, GLfloat height, int numVertical, int numHorizontal, GLfloat xPos, GLfloat yPos, int ID = -1, float gap = 0.05f);
-        frame(int vsize, int hsize, int numHorizontal, int numVertical,float gap = 0.05f);
+        frame(GLfloat height, GLfloat width, int numVertical, int numHorizontal, GLfloat xPos, GLfloat yPos, int ID = -1, float gap = 0.05f);
+        //frame(int vsize, int hsize, int numHorizontal, int numVertical,float gap = 0.05f);
         virtual ~frame();
         //void addElement(int grid_w, int grid_h, guiElement* element);
         void addElement(int vPos, int hPos, int vSize, int hSize, int ID);
@@ -105,6 +105,8 @@ class frame : public guiElement
 
         std::string getTextInput(int ID);
         bool getState(int ID);
+
+        guiElement* getElement(int ID);
         
         //frame* getSubFrame(int ID);
         
@@ -136,6 +138,7 @@ class textDisp : public guiElement
         textDisp(int vsize,int hsize, int ID, const char* text);
         void onClick(functionPtr fun);
         void setTextColor(GLfloat r, GLfloat g, GLfloat b);
+        void setText(const char* text);
         void draw();
 };
 
@@ -168,7 +171,5 @@ class toggleButton : public button
         void onClick(functionPtr fun);
         void toogle();
 };
-
-
 
 #endif //GUI_H

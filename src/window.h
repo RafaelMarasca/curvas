@@ -81,6 +81,7 @@ class window
         
         std::map<int,frame*> menu;
         int currentMenu;
+        std::pair<int,bool> tempMenu;
 
         unsigned int selectedShapeID; //ID da forma selecionada
 
@@ -88,6 +89,7 @@ class window
         std::vector<std::string> buffer; //Buffer para as entradas do usuário
         
         GLfloat aspectRatio; //Razão de aspecto da tela.
+       
 
     public:
         //Construtor para a classe window
@@ -109,11 +111,16 @@ class window
         void setWaiting(int wait);
         void setInputType(inputType t);
 
+        void showPopUp(char* text);
+        void closePopUp();
+
+
         static void menuClick0(int);
         static void menuClick1(int);
         static void menuClick2(int);
+        static void menuClick3(int);
 
-        static void redisplay(); //Método para requerer o redesenho da tela.
+        //static void redisplay(); //Método para requerer o redesenho da tela.
         static void draw(); //Método para desenhar os objetos da cena.
         
         static void mouseClick(int button, int state,int x, int y); //Método chamado ao clicar na tela
