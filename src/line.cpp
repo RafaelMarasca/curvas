@@ -40,14 +40,29 @@ void line::draw()
 }
 
 
-bool line::collision(GLfloat x, GLfloat y, GLfloat z){} //Detecta colisão entre a forma e um ponto.
-bool line::collision(geometry* other){}
+bool line::collision(GLfloat x, GLfloat y, GLfloat z){} //Método de colisão para classe linha
+bool line::collision(geometry* other){} //Método de colisão para a classe linha
 
 
+/**
+ * @brief Construtor para a classe lineStrip
+ * 
+ * @param usage Modo de desenho
+ */
 lineStrip::lineStrip(GLenum usage): line(usage){} 
 
+/**
+ * @brief Construtor para a classe lineStrip
+ * 
+ * @param vertex Vetor de vértices 
+ * @param usage Modo de desenho
+ */
 lineStrip::lineStrip(std::vector<GLfloat> &vertex, GLenum usage ) : line(vertex,usage){}
 
+/**
+ * @brief Desenha a lineStrip
+ * 
+ */
 void lineStrip::draw()
 {
     geometry::program->use(); //Usa o programa

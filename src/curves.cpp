@@ -1,9 +1,27 @@
+/**
+ * @file curves.cpp
+ * @author Rafael Marasca Martins e Lucas Carvalho
+ * @brief Implementação da classe B-Spline
+ * @version 0.1
+ * @date 2022-10
+ */
+
+
 #include "curves.h"
 #include<iostream>
 #include<cmath>
 #include<GL/glew.h>
 
 
+/**
+ * @brief Avalia o valor da função base (N(i,j,t)) da curva B-Spline conforme o algoritmo recursivo de de Boor.
+ * 
+ * @param knots : Vetor de nós da B-Spline.
+ * @param i : Índice i - Ponto de controle i.
+ * @param j : Índice j - Grau da curva.
+ * @param t : Ponto de Avaliação da função
+ * @return float - Valor da função base 
+ */
 float genAlgo(std::vector<GLfloat>& knots, int i, int j, float t)
 {
     if(j == 0)
@@ -28,19 +46,18 @@ float genAlgo(std::vector<GLfloat>& knots, int i, int j, float t)
 }
 
 
+/**
+ * @brief Gera a B-Spline.
+ * 
+ */
 void bSpline::generate()
 {
     if(this->controlPoints.size() < this->order+1)
         throw std::string("Ordem da spline eh menor que a quantidade de pontos de controle.");
 
-    std::cout<<"chamado";
-
-    this->controlLine->print();
-
-
     int size = controlPoints.size()/3;
 
-
+    //Gera os nós para b-spline presa nos pontos inicial e final
     if(this->isClamped)
     {
         for(int i = 0; i<(size+1-this->order); i++)
@@ -52,22 +69,16 @@ void bSpline::generate()
                     this->knots.push_back(this->knots[i == 0? 0:(size)]);
             }
         }
-    }else
+    }else //Gera os nós para b-spline não presa nos pontos inicial e final
     {
         for(int i = 0; i<(size+this->order+1); i++)
         {
             this->knots.push_back(float(i)/float(size+this->order));
         }
     }
-    
 
-    /**for(int i = 0; i<knots.size(); i++)
-    {
-        std::cout<<knots[i]<<std::endl;
-    }*/
-   
-
-    float t = this->knots[order];//0.0f; + RESOLUTION;
+    //Calcula o valor da curva no ponto t conforme o algoritmo de de Boor
+    float t = this->knots[order];
 
     while(t <= *(this->knots.end()-order-1))//1.0f
     {
@@ -92,6 +103,12 @@ void bSpline::generate()
     glBufferData(GL_ARRAY_BUFFER, (this->vertices).size()*sizeof(GLfloat),&(this->vertices[0]), this->usage);
 }
 
+
+/**
+ * @brief Adiciona um ponto de controle à curva.
+ * 
+ * @param newControlPoint vetor contendo as coordenadas do ponto de controle a ser inserido.
+ */
 void bSpline::addControlPoint(std::vector<GLfloat>& newControlPoint)
 {
     if((newControlPoint.size()%3)!=0)
@@ -104,6 +121,13 @@ void bSpline::addControlPoint(std::vector<GLfloat>& newControlPoint)
     this->controlLine->addVertex(newControlPoint);
 }
 
+/**
+ * @brief Adiciona um ponto de controle à curva.
+ * 
+ * @param x Coordenada x do ponto.
+ * @param y Coordenada y do ponto.
+ * @param z Coordenada z do ponto.
+ */
 void bSpline::addControlPoint(GLfloat x, GLfloat y, GLfloat z)
 {
     this->controlPoints.push_back(x);
@@ -115,7 +139,11 @@ void bSpline::addControlPoint(GLfloat x, GLfloat y, GLfloat z)
 }
 
 
-
+/**
+ * @brief Construtor para a b-Spline.
+ * 
+ * @param order : ordem da b-Spline.
+ */
 bSpline::bSpline(int order, GLenum usage /*= GL_DYNAMIC_DRAW*/) : geometry(usage)
 {
     this->isClamped = true;
@@ -126,6 +154,12 @@ bSpline::bSpline(int order, GLenum usage /*= GL_DYNAMIC_DRAW*/) : geometry(usage
     this->controlLine->setColor(R_CONTROL, G_CONTROL, B_CONTROL);
 }
 
+/**
+ * @brief Construtor para a b-Spline.
+ * 
+ * @param controlPoints : vetor dos pontos de controle da curva
+ * @param order : ordem da b-Spline.
+ */
 bSpline::bSpline(std::vector<GLfloat>& controlPoints, int order, GLenum usage /*= GL_DYNAMIC_DRAW*/): geometry(usage)
 {
     this->isClamped = true;
@@ -137,15 +171,24 @@ bSpline::bSpline(std::vector<GLfloat>& controlPoints, int order, GLenum usage /*
 }
 
 
+/**
+ * @brief Destrutor da classe bSpline.
+ * 
+ */
 bSpline::~bSpline()
 {
     delete this->controlLine;
 }
 
+/**
+ * @brief Desenha a b-Spline
+ * 
+ */
 void bSpline::draw()
 {
     if(this->controlPointsVisibility)
         this->controlLine->draw();
+
     geometry::program->use();
     glUniform3fv(this->colorLoc, 1, &(this->color[0]));
     glBindVertexArray(this->VAO);
@@ -198,18 +241,33 @@ bool bSpline::collision(geometry* other)
     return false; // Não foi detectada colisão.
 }
 
+/**
+ * @brief Seta a cor da b-Spline
+ * 
+ * @param r Valor de vermelho da nova cor 
+ * @param g Valor de verde da nova cor
+ * @param b Valor de azul da nova cor
+ */
 void bSpline::setColor(GLfloat r, GLfloat g, GLfloat b)
 {
     this->geometry::setColor(r,g,b);
     this->controlLine->setColor(r,g,b);
 }
 
+/**
+ * @brief Reseta a cor da b-Spline 
+ * 
+ */
 void bSpline::resetColor()
 {
     this->geometry::setColor(R_SPLINE,G_SPLINE,B_SPLINE);
     this->controlLine->setColor(R_CONTROL,G_CONTROL,B_CONTROL);
 }
 
+/**
+ * @brief Torna a spline clamped (Presa aos pontos inicial e final)
+ * 
+ */
 void bSpline::makeClamped()
 {
     if(!this->isClamped)
@@ -221,6 +279,10 @@ void bSpline::makeClamped()
     }    
 }
 
+/**
+ * @brief Torna a spline unclamped (Não presa aos pontos inicial e final)
+ * 
+ */
 void bSpline::makeUnclamped()
 {
     if(this->isClamped)
@@ -232,6 +294,11 @@ void bSpline::makeUnclamped()
     }  
 }
 
+/**
+ * @brief Seta a visibilidade dos pontos de controle da curva
+ * 
+ * @param isVisible se true: torna os pontos de controle visíveis, se false: torna os pontos de controle invisíveis
+ */
 void bSpline::setControlPointsVisibility(bool isVisible)
 {
     this->controlPointsVisibility = isVisible;

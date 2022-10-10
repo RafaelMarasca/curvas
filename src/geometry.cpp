@@ -231,13 +231,12 @@ bool square::collision(GLfloat x, GLfloat y, GLfloat z)
 }
 
 
-
 /**
- * @brief Verifica colisão entre duas formas
+ * @brief Verifica colisão entre o quadrado e outra forma
  * 
  * @param other : a forma a se verificar colisão.
- * @return true : Caso haja colisão entre as curvas.
- * @return false : Caso não haja colisão entre as curvas.
+ * @return true : Caso haja colisão entre a forma e o quadrado.
+ * @return false : Caso não haja colisão entre a forma e o quadrado.
  */
 bool square::collision(geometry* other)
 {
@@ -253,6 +252,10 @@ bool square::collision(geometry* other)
     return true; // Não foi detectada colisão.
 }
 
+/**
+ * @brief Desenha o quadrado
+ * 
+ */
 void square::draw()
 {
     geometry::program->use();
@@ -261,51 +264,21 @@ void square::draw()
     glDrawArrays(GL_TRIANGLE_FAN, 0, this->vertices.size()/3);
 }
 
-
-/*
-void square::updateLength(GLfloat x, GLfloat y)
-{
-    if(this->vertices.size())
-    {
-        //std::cout<<"ATUALIZADO"<<std::endl;
-
-        this->vertices.erase(this->vertices.begin()+3, this->vertices.end());
-        std::vector<GLfloat> coordinates = {x, this->vertices[1], this->vertices[2]};
-        this->addVertex(coordinates);
-        coordinates[1] = y;
-        this->addVertex(coordinates);
-        coordinates[0] = this->vertices[0];
-        this->addVertex(coordinates);
-
-        //for(int i = 0; i<this->vertices.size(); i++)
-          //  std::cout<<this->vertices[i]<<" ";
-        //std::cout<<std::endl;
-    }   
-}*/
-
-/*
-void square::addStart(GLfloat x, GLfloat y)
-{
-    std::cout<<"Adicionado"<<std::endl;
-    std::vector<GLfloat> coordinates = {x,y,0.0f};
-    this->clearVertex();
-    this->addVertex(coordinates);
-}*/
-/*
-void square::clearVertex()
-{
-    this->vertices.clear();
-}*/
-
-
+/**
+ * @brief Construtor para a classe quadrado
+ * 
+ * @param usage Modo de desenho
+ */
 square::square(GLenum usage):geometry(usage){}
 
-void geometry::resetColor()
-{
-    this->setColor(GEOMETRY_R,GEOMETRY_G, GEOMETRY_B);
-}
-
-
+/**
+ * @brief Construtor para a classe quadrado
+ * 
+ * @param width Largura do quadrado
+ * @param height Altura do quadrado
+ * @param xPos Posição x do canto superior esquerdo do quadrado
+ * @param yPos Posição y do canto superior esquerdo do quadrado
+ */
 square::square(GLfloat width, GLfloat height, GLfloat xPos, GLfloat yPos)
 {
     std::vector<GLfloat> aux (12,0.0f);
@@ -318,4 +291,13 @@ square::square(GLfloat width, GLfloat height, GLfloat xPos, GLfloat yPos)
     aux[9] = xPos;
     aux[10] = yPos -height;
     this->addVertex(aux);
+}
+
+/**
+ * @brief Reseta a cor do quadrado
+ * 
+ */
+void geometry::resetColor()
+{
+    this->setColor(GEOMETRY_R,GEOMETRY_G, GEOMETRY_B);
 }

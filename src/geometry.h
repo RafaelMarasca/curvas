@@ -100,19 +100,22 @@ class geometry
 };
 
 
-
+/**
+ * @brief Classe square - Define a abstração de um quadrado
+ * 
+ */
 class square : public geometry
 {
 
     public:
 
-        square(GLenum usage = GL_STATIC_DRAW);
-        square(GLfloat width, GLfloat height, GLfloat xPos, GLfloat yPos);
+        square(GLenum usage = GL_STATIC_DRAW); //Construtor para a classe square
+        square(GLfloat width, GLfloat height, GLfloat xPos, GLfloat yPos); //Construtor para a classe square
 
         void draw();
 
-        bool collision(GLfloat x, GLfloat y, GLfloat z); //Detecta colisão entre a forma e um ponto.
-        bool collision(geometry* other);
+        bool collision(GLfloat x, GLfloat y, GLfloat z); //Detecta colisão entre o quadrado e um ponto.
+        bool collision(geometry* other); //Detecta a colisão entre o quadrado e outra geometria.
 
 };
 
