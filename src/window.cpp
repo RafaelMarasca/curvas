@@ -599,9 +599,7 @@ void window::deleteShape()
 {
     if(this->selectedShape) //Caso alguma forma esteja selecionada
     {
-        std::cout<<"Tentando apagar"<<std::endl;
 	    geometry* temp = this->vision->removeObject(this->selectedShapeID);//Remove o objeto da cena
-        std::cout<<"removi"<<std::endl;
         if(!temp)
         {
             throw std::string("Objeto inválido");
