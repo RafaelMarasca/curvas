@@ -643,8 +643,7 @@ void window::select(std::pair<unsigned int, geometry*> obj)
  */
 void window::clearSelection()
 {
-    this->selectedShape = nullptr;
-    this->selectedShapeID = 0;
+    this->select(std::pair<unsigned int, geometry*>{0,nullptr});
 
     this->setMenu(0,HIDDEN); //Seta o menu corrente para 0.
 

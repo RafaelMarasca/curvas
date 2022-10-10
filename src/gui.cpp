@@ -82,8 +82,8 @@ guiElement::guiElement(GLfloat height, GLfloat width, GLfloat xPos, GLfloat yPos
  */
 guiElement::guiElement(int verticalSize, int horizontalSize, int ID)
 {
-    this->hSize = hSize;
-    this->vSize = vSize;
+    this->hSize = horizontalSize;
+    this->vSize = verticalSize;
     this->ID = ID;
     this->clicked = false;
 }
@@ -219,7 +219,7 @@ void frame::addElement(int vPos, int hPos, int vSize, int hSize, int ID)
 {
     if(!(hPos> (this->numHorizontalElements-1) || vPos> (this->numVerticalElements-1) || hSize > (this->numHorizontalElements) || vSize> (this->numVerticalElements)))
     {
-        guiElement* newElement = new guiElement(hSize, vSize, ID);
+        guiElement* newElement = new guiElement(vSize, hSize, ID);
         this->addElement(vPos,hPos,newElement);
     }
 }
@@ -343,7 +343,7 @@ void frame::generate()
             if((*it2) != nullptr)
             {
                 GLfloat width = this->elementWidth + (((*it2)->getHSize()-1)*hGap/(*it2)->getHSize());
-                (*it2)->generate(this->elementHeight, element_xPos, element_yPos, width);
+                (*it2)->generate(this->elementHeight, width, element_xPos, element_yPos);
                 element_xPos += (elementWidth + hGap)*(*it2)->getHSize();
             }else
             {
@@ -748,7 +748,7 @@ void textDisp::setText(const char* text)
  * @param hsize Tamanho horizontal (em células)
  * @param ID ID da caixa de texto
  */
-textInput::textInput(int vsize,int hsize, int ID):guiElement(hsize, vsize, ID)
+textInput::textInput(int vsize,int hsize, int ID):guiElement(vsize, hsize, ID)
 {
     this->setColor(1.0f,1.0f,1.0f);
 }
