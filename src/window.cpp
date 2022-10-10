@@ -611,7 +611,7 @@ void window::deleteShape()
 		    delete temp;
             this->selectedShape = nullptr;
             this->selectedShapeID = 0;
-            std::cout<<"Apagay"<<std::endl;
+            this->clearSelection();
 		}
     }else
     {

@@ -52,7 +52,7 @@ float genAlgo(std::vector<GLfloat>& knots, int i, int j, float t)
  */
 void bSpline::generate()
 {
-    if(this->controlPoints.size() < this->order+1)
+    if(this->controlPoints.size() < this->order)
         throw std::string("Ordem da spline eh menor que a quantidade de pontos de controle.");
 
     int size = controlPoints.size()/3;
