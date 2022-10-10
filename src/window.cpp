@@ -53,9 +53,9 @@ void window::menuClick0(int ID)
                     if(pointNum <= 0 || order <= 0) //Caso a entrada de uma das caixas seja <= 0
                     {
                         w->showPopUp("Entrada deve ser Positiva!"); 
-                    }else if(pointNum <= order) //Caso o número de pontos seja menor ou igual a ordem da curva
+                    }else if(pointNum < order) //Caso o número de pontos seja menor ou igual a ordem da curva
                     {
-                        w->showPopUp("Numero de Pontos <= Ordem!"); 
+                        w->showPopUp("Numero de Pontos < Ordem!"); 
                     }else //Caso esteja tudo em ordem
                     {
                         w->getMenu()->clear(); //Limpa os dados do menu
@@ -81,9 +81,9 @@ void window::menuClick0(int ID)
                     if(pointNum <= 0 || order <= 0) //Caso a entrada de uma das caixas seja <= 0
                     {
                         w->showPopUp("Entradas devem ser > 0!");
-                    }else if(pointNum <= order) //Caso o número de pontos seja menor ou igual a ordem da curva
+                    }else if(pointNum < order) //Caso o número de pontos seja menor ou igual a ordem da curva
                     {
-                        w->showPopUp("Numero de Pontos <= Ordem!");
+                        w->showPopUp("Numero de Pontos < Ordem!");
                     }else //Caso esteja tudo em ordem
                     {
                         w->getMenu()->clear(); //Limpa os dados do menu
@@ -599,7 +599,9 @@ void window::deleteShape()
 {
     if(this->selectedShape) //Caso alguma forma esteja selecionada
     {
+        std::cout<<"Tentando apagar"<<std::endl;
 	    geometry* temp = this->vision->removeObject(this->selectedShapeID);//Remove o objeto da cena
+        std::cout<<"removi"<<std::endl;
         if(!temp)
         {
             throw std::string("Objeto inválido");
@@ -607,7 +609,9 @@ void window::deleteShape()
 		{
             //Limpa a seleção
 		    delete temp;
-            this->clearSelection();
+            this->selectedShape = nullptr;
+            this->selectedShapeID = 0;
+            std::cout<<"Apagay"<<std::endl;
 		}
     }else
     {
