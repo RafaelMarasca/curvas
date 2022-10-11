@@ -34,12 +34,12 @@ float genAlgo(std::vector<GLfloat>& knots, int i, int j, float t)
 
     if(!(std::abs(knots[i+j] - knots[i]) < 0.0000001f))
     {
-        A1 = genAlgo(knots, i,j-1,t)*((t-knots[i])/(knots[i+j] - knots[i]));
+        A1 = genAlgo(knots, i, j-1, t) * ((t-knots[i])/(knots[i+j] - knots[i]));
     }
     
     if(!(std::abs(knots[i+j+1] - knots[i+1]) < 0.0000001f))
     {
-        A2 = genAlgo(knots, i+1,j-1,t)*((knots[i+j+1]-t)/(knots[i+j+1]-knots[i+1]));
+        A2 = genAlgo(knots, i+1, j-1, t) * ((knots[i+j+1]-t)/(knots[i+j+1] - knots[i+1]));
     }
 
     return  A1+A2; 
@@ -52,7 +52,7 @@ float genAlgo(std::vector<GLfloat>& knots, int i, int j, float t)
  */
 void bSpline::generate()
 {
-    if(this->controlPoints.size() < this->order)
+    if(this->controlPoints.size() <= this->order)
         throw std::string("Ordem da spline eh menor que a quantidade de pontos de controle.");
 
     int size = controlPoints.size()/3;
@@ -80,7 +80,7 @@ void bSpline::generate()
     //Calcula o valor da curva no ponto t conforme o algoritmo de de Boor
     float t = this->knots[order];
 
-    while(t <= *(this->knots.end()-order-1))//1.0f
+    while(t <= this->knots[size])
     {
         this->vertices.push_back(0.0f);
         this->vertices.push_back(0.0f);

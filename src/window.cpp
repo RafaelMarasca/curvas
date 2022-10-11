@@ -52,10 +52,10 @@ void window::menuClick0(int ID)
 
                     if(pointNum <= 0 || order <= 0) //Caso a entrada de uma das caixas seja <= 0
                     {
-                        w->showPopUp("Entrada deve ser Positiva!"); 
-                    }else if(pointNum < order) //Caso o número de pontos seja menor ou igual a ordem da curva
+                        w->showPopUp("Entradas devem ser >0!"); 
+                    }else if(pointNum <= order) //Caso o número de pontos seja menor ou igual a ordem da curva
                     {
-                        w->showPopUp("Numero de Pontos < Ordem!"); 
+                        w->showPopUp("Numero de Pontos deve ser > Ordem!"); 
                     }else //Caso esteja tudo em ordem
                     {
                         w->getMenu()->clear(); //Limpa os dados do menu
@@ -81,9 +81,9 @@ void window::menuClick0(int ID)
                     if(pointNum <= 0 || order <= 0) //Caso a entrada de uma das caixas seja <= 0
                     {
                         w->showPopUp("Entradas devem ser > 0!");
-                    }else if(pointNum < order) //Caso o número de pontos seja menor ou igual a ordem da curva
+                    }else if(pointNum <= order) //Caso o número de pontos seja menor ou igual a ordem da curva
                     {
-                        w->showPopUp("Numero de Pontos < Ordem!");
+                        w->showPopUp("Numero de Pontos deve ser > Ordem!");
                     }else //Caso esteja tudo em ordem
                     {
                         w->getMenu()->clear(); //Limpa os dados do menu
@@ -157,8 +157,9 @@ void window::menuClick1(int ID)
                 if(w->waitingInput)
                 {
                     w->waitingInput = 0; //Zera a flag de espera por entrada
-                    w->vision->removeObject(w->selectedShapeID); //Remove o objeto corrente
+                    w->deleteShape(); //Remove o objeto corrente
                     w->setMenu(0);//Seta o menu para 0.
+                    w->inType = NONE;
                 }
                 w->clearSelection(); //Desseleciona os objetos
             break;
@@ -315,7 +316,7 @@ frame* newOptMenu()
  */
 frame* newPopUp()
 {
-    frame* menu = new frame(0.5f, 1.0f, 2, 4, -0.5, 0.25, -1, 0.1); //Cria o frame do menu
+    frame* menu = new frame(0.5f, 1.2f, 2, 4, -0.6, 0.25, -1, 0.1); //Cria o frame do menu
     
     //Adiciona os elementos do menu
     menu->addButton(1,1,1,2,0,"OK");
@@ -348,7 +349,7 @@ void window::keyp(unsigned char key, int x, int y)
             if(w->waitingInput) //Verifica se está sendo construída uma forma
             {
                 w->waitingInput = 0; //Seta a flag de espera de entrada para 0
-                w->vision->removeObject(w->selectedShapeID); //Remove o objeto que está sendo criado
+                w->deleteShape();
                 w->inType = NONE; //Seta o tipo de entrada pra NONE
                 w->setMenu(0); //Seta o menu corrente como 0
             }
