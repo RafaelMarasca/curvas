@@ -8,7 +8,6 @@
  * 
  */
 
-
 #include"window.h"
 #include"scene.h"
 #include<GL/glut.h>
@@ -369,10 +368,9 @@ void window::keyp(unsigned char key, int x, int y)
 
         //Tecla Espaço
         case 32: //Exibe/Esconde o menu atual
-            if(w->menu[w->currentMenu]->visible())
-                w->menu[w->currentMenu]->hide();
-            else
-                w->menu[w->currentMenu]->show();
+            w->setMenu(w->currentMenu, 
+                        w->menu[w->currentMenu]->visible()? HIDDEN : VISIBLE, 
+                        false);
         break;
     }
 
@@ -795,16 +793,30 @@ frame* window::getMenu()
     return this->menu[this->currentMenu];
 }
 
+
 /**
  * @brief Seta o menu corrente.
  * 
  * @param ID : ID do menu que será corrente 
  * @param state : Estado inicial do menu (HIDDEN/ VISIBLE) - DEFAULT: VISIBLE
+ * @param clear : true - Limpa os dados do menu / false - Não limpa os dados do menu.
  */
-void window::setMenu(int ID, menuState state)
+void window::setMenu(int ID, menuState state, bool clear)
 {
-    this->menu[this->currentMenu]->clear(); //Limpa os dados do menu corrente.
+    if(clear)
+        this->menu[this->currentMenu]->clear(); //Limpa os dados do menu corrente.
+
     this->menu[this->currentMenu]->hide(); //Esconde o menu corrente.
+
+    if(ID == 2)
+    {
+        bSpline* B = dynamic_cast <bSpline*> (this->selectedShape);
+        if(B)
+        {
+            this->getMenu()->setState(4,B->clamped());
+            this->getMenu()->setState(2,B->cpVisible());
+        }
+    }
     if(state == VISIBLE) //Verifica se o estado inicial é VISIBLE.
         this->menu[ID]->show(); //Mostra o novo menu.
     else

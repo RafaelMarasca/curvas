@@ -142,6 +142,7 @@ class frame : public guiElement
         
         bool visible(); //Verifica se o frame está visível
         bool getState(int ID); //Retorna o estado dos botões toggle do frame
+        void setState(int ID, bool state); //Seta o estado de um botão do frame.
         
         std::string getTextInput(int ID); //Retorna o texto das caixas de texto do frame
        

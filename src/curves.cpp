@@ -303,3 +303,25 @@ void bSpline::setControlPointsVisibility(bool isVisible)
 {
     this->controlPointsVisibility = isVisible;
 }
+
+/**
+ * @brief Verifica se a bSpline é presa ou solta.
+ * 
+ * @return true se a bSpline é presa.
+ * @return false se a bSpline é solta.
+ */
+bool bSpline::clamped()
+{
+    return this->isClamped;
+}
+
+/**
+ * @brief Verifica se os pontos de controle estão visíveis.
+ * 
+ * @return true se os pontos de controle estão visíveis.
+ * @return false se os pontos de controle não estão visíveis.
+ */
+bool bSpline::cpVisible()
+{
+    return this->controlPointsVisibility;
+}

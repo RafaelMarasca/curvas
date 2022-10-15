@@ -100,7 +100,7 @@ class window
         void showPopUp(const char* text); //Mostra um popUp.
         void closePopUp(); //Fecha o popUp.
 
-        void setMenu(int ID, menuState = VISIBLE); //Seta o menu atual.
+        void setMenu(int ID, menuState state = VISIBLE, bool clear = true); //Seta o menu atual.
         void addSpline(int pointNum, int order, inputType t); //Adiciona uma B-Spline
 
         frame* getMenu(); //Getter para o menu atual.

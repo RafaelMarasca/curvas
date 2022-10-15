@@ -254,6 +254,21 @@ void frame::draw()
 }
 
 /**
+ * @brief Setter para o estado de um toggle button.
+ * 
+ * @param ID ID do botão.
+ * @param state Novo estado.
+ */
+void frame::setState(int ID, bool state)
+{
+    toggleButton* t = dynamic_cast<toggleButton*>(this->getElement(ID));
+    
+    if(t)
+        t->setState(state);
+}
+
+
+/**
  * @brief Destrutor da classe frame - Destrói o frame e todos os seus elementos
  * 
  */

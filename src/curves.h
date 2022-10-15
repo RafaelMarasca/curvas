@@ -75,6 +75,9 @@ class bSpline : public geometry
         void makeClamped(); //Prende a curva aos pontos final e inicial
         void makeUnclamped(); //Desprende a curva dos pontos final e inicial
         void setControlPointsVisibility(bool isVisible); //Seta a visibilidade da curva.
+
+        bool clamped(); 
+        bool cpVisible();
 };
 
 #endif //CURVES_H
