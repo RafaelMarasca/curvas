@@ -120,10 +120,7 @@ void window::menuClick1(int ID)
                     x = stof(xStr);
                     y = stof(yStr);
 
-                    if(std::fabs(x)>1  || std::fabs(y)>1) //Verifica se o desenho ficará fora da tela
-                    {
-                         w->showPopUp("O Desenho Ficara Fora da Tela!");
-                    }
+                    
                     
                     if(!(w->vision->checkCollision(x,y).first)) //Verifica se o ponto adicionado colidiu com outro ponto
                     {
@@ -144,6 +141,11 @@ void window::menuClick1(int ID)
                             b->generate(); //Gera a Spline
                             w->inType = NONE; //Seta o tipo de entrada para nenhuma
                             w->setMenu(0,HIDDEN); //Seta o menu como 0.
+                        }
+
+                        if(std::fabs(x)>1  || std::fabs(y)>1) //Verifica se o desenho ficará fora da tela
+                        {
+                            w->showPopUp("O Desenho Ficara Fora da Tela!");
                         }
                     }else{
                         //Caso tenha havido colisão
