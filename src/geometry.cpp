@@ -245,11 +245,11 @@ bool square::collision(geometry* other)
     //Verifica se há colisão entre um dos vértices do outro objeto e a forma atual.        
     for(it = this->vertices.begin(); it!= this->vertices.end(); it+=3)
     {
-        if(!(other->collision(*it, *(it+1), *(it+2))))
-			return false; //colisão detectada.
+        if((other->collision(*it, *(it+1), *(it+2))))
+			return true; //colisão detectada.
     }
  
-    return true; // Não foi detectada colisão.
+    return false; // Não foi detectada colisão.
 }
 
 /**

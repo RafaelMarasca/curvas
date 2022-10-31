@@ -218,6 +218,8 @@ bool bSpline::collision(GLfloat x, GLfloat y, GLfloat z)
        if((std::abs(*it - x) < 0.01f ) && (std::abs(*(it+1) - y) < 0.01f ))
         return true;
     }
+
+    return false; //Não foi detectada colisão
 }
 
 /**

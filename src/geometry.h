@@ -55,8 +55,6 @@ const std::string fragmentShaderSource =
         "}\n";
 
 
-
-
 /**
  * @brief Classe geometry - Define a abstração de uma forma geométrica.
  * 
