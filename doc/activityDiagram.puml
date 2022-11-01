@@ -1,0 +1,34 @@
+@startuml OpenGL_CV_AD
+
+start
+
+repeat :Tela de visualização;
+if(Tecla pressionada?) then (Não)
+
+(Sim) elseif() then (Delete)
+    :Deleta a curva;
+(Espaço) elseif (Curva selecionada?) then (Sim)
+    :Edita a curva;
+(Não) elseif (Adicionar nova curva?) then (Sim)
+    repeat
+    :Menu de inserção de curva;
+    :Digitar número de pontos
+    e ordem da bSpline;
+    if(Tipo de entrada) then (Mouse)
+        :Clicar nos pontos
+        de controle;
+    else (Teclado)
+        :Digitar os pontos
+        de controle;
+    endif;
+    repeat while (Dados válidos?) is (Não)
+    ->Sim;
+    :Curva adicionada;
+
+else (Não)
+endif
+repeat while (Sair?) is (Não)
+->Sim;
+stop
+
+@enduml

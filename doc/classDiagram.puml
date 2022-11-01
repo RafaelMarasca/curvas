@@ -1,0 +1,341 @@
+@startuml OpenGL_CV
+
+class axis extends line{
+    + axis();
+    + ~axis();
+}
+
+enum plane {
+    + YZ_PLANE;
+    + XZ_PLANE;
+    + XY_PLANE;
+}
+
+class bSpline extends geometry {
+    - order : int;
+    - knots : vector<GLfloat>;
+    - controlPoints : vector<GLfloat>;
+    - controlLine : lineStrip*
+    - isClamped : bool;
+    - controlPointsVisibility : bool;
+
+    + bSpline(order : int, usage : GLenum = GL_STATIC_DRAW);
+    + bSpline(controlPoints : vector<GLfloat&, order : int, usage : GLenum = GL_STATIC_DRAW);
+
+    + collision(other : geometry*) : bool;
+    + collision(x : GLfloat, y : GLfloat, z : GLfloat) : bool;
+
+    + addControlPoint(newControlPoint : vector<GLfloat>&) : void;
+    + addControlPoint(x : GLfloat, y : GLfloat, z : GLfloat) : void;
+
+    + generate() : void;
+
+    + setColor(r : GLfloat, g : GLfloat, b : GLfloat) : void;
+    + resetColor() : void;
+
+    + draw() : void;
+
+    + makeClamped() : void;
+    + makeUnclamped() : void;
+    
+    + setControlPointVisibility(isVisible : bool) : void;
+
+    + clamped() : void;
+    + cpVisible() : void;
+}
+bSpline "1" *-- "1" lineStrip
+
+abstract class geometry {
+    - geometryCount  : static unsigned int;
+
+    # program        : shaderProgram*;
+    # centralPoint   : vector<GLfloat>;
+    # vertices       : vector<GLfloat>;
+    # VBO            : GLuint;
+    # VAO            : GLuint;
+    # usage          : GLenum;
+    # colorLoc       : GLuint;
+    # color          : vector<GLfloat>;         
+    # vertexNum      : unsigned int; 
+
+    - setup() : void;
+
+    + geometry(usage            : GLenum = GL_STATIC_DRAW);    
+    + geometry(vertices         : vector<GLfloat> &,  usage : GLenum = GL_STATIC_DRAW);
+    + {abstract} ~geometry();
+
+    + addVertex(vertex          : vector<GLfloat> &) : void;
+        
+    + {abstract} setColor(r : GLfloat, g : GLfloat, b : GLfloat) : void;
+    + {abstract} resetColor() : void;
+
+    + {abstract} collision(x : GLfloat, y : GLfloat, z : GLfloat) = 0 : bool;
+    + {abstract} collision(geometry*) = 0 : bool;
+
+    + {abstract} draw() = 0 : void;
+    + print() : void;
+
+}
+geometry "1" o-- "1" plane
+
+class line extends geometry {
+    - collision(x : GLfloat, y : GLfloat, z : GLfloat) : void;
+    - collision(other : geometry*);
+
+    + line(usage : GLenum = GL_STATIC_DRAW);
+    + line(vertex : vector<GLfloat> &, usage : GLenum = GL_STATIC_DRAW);
+    + draw() : void;
+}
+
+class lineStrip extends line {
+    + lineStrip(usage : GLenum = GL_DYNAMIC_DRAW)
+    + lineStrip(vertex : vector<GLfloat> &, usage : GLenum = GL_STATIC_DRAW);
+    + draw() : void;
+}
+
+class scene {
+    - objects : map<unsigned int, geometry*>;
+    - theAxis : axis*;
+    - nextID  : unsigned int;
+
+    + scene();
+    + ~scene();
+    
+    + getObject(id : unsigned int) : pair<unsigned int, geometry*>
+    + checkCollision(geo : geometry*) : bool
+
+    + begin() : sceneIterator;
+    + end() : sceneIterator;
+
+    + draw() : void;
+
+    + addObject(object : geometry*) : unsigned int;
+    + removeObject(id : unsigned int) : geometry*;    
+}
+scene "1"  *-- "0..*" geometry
+scene "1" *-- "1" axis
+
+class shaderProgram {
+    - shaderProgramID : GLuint;
+    
+    - transformLoc : GLuint;
+    - colorLoc : GLuint;
+
+    - compile(vertexShaderSource : const char*, fragmentShaderSource : const char*) : void;
+
+    + shaderProgram(vertexShaderSource : const string, fragmentShaderSource : string);
+    + ~shaderProgram(); 
+
+    + use() : void;
+
+    + getTransformLoc : GLuint;
+    + getColorLoc : GLuint;
+}
+geometry "1" *-- "1" shaderProgram
+
+class square extends geometry {
+    + square(usage : GLenum = GL_STATIC_DRAW);
+    + square(width : GLfloat, height : GLfloat, xPos : GLfloat, yPos : GLfloat);
+
+    + draw() : void;
+    + collision(x : GLfloat, y : GLfloat, z : GLfloat) : bool;
+    + collision(other : geometry*) : bool;
+}     
+
+class guiElement extends square {
+    # vSize : int;
+    # hSize : int;
+    # ID : int;
+
+    # width : GLfloat;
+    # height : GLfloat;
+    # xPos : GLfloat;
+    # yPos : GLfloat;
+
+    # clicked : bool;
+
+    + guiElement(verticalSize : int, horizontalSize : int, ID : int);
+    + guiElement(height : GLfloat, width : GLfloat, xPos : GLfloat, yPos : GLfloat)
+
+    + getHSize() : int;
+    + getVSize() : int;
+    + getID() : int;
+
+    + {abstract} onClick(int*) : void
+    + {abstract} onKeyPress(int) : void
+    + {abstract} generate(height : GLfloat, width : GLfloat, xPos : GLfloat, yPos : GLfloat) : void;
+    + {abstract} setClicked(state : bool) : void;
+    + {abstract} draw() : void;
+    + {abstract} clear() : void;
+}
+
+class frame extends guiElement {
+    - numHorizontalElements : int;
+    - numVerticalElements : int;
+
+    - elementHeight : GLfloat;
+    - elementWidth : GLfloat;
+    - vGap : GLfloat;
+    - hGap : GLfloat;
+    - gap : GLfloat;
+
+    - clickFunction : functionPtr;
+
+    - isVisible : bool;
+
+    - elements : vector<vector<guiElement*>>
+
+    - addElement(vpos : int, hpos : int, element : guiElement*) : void;
+
+    + frame(height : GLfloat, width : GLfloat, numVertical : int, numHorizontal : int, xPos : GLfloat, yPos : GLfloat, ID : int = -1, gap : float = 0.05);
+    
+    + show() : void;
+    + draw() : void;
+    + hide() : void;
+    + generate() : void;
+
+    + addButton(vpos : int, hpos : int, vsize : int, hsize : int, ID : int, text : const char*) : void;
+    + addButton(vpos : int, hpos : int, vsize : int, hsize : int, ID : int, text : const char*, color : vector<GLfloat>) : void;
+    + addToggleButton(vpos : int, hpos : int, vsize : int, hsize : int, ID : int, state : bool) : void;
+    
+    + addText(vpos : int, hpos : int, vsize : int, hsize : int, ID : int, text : const char*) : void;
+    + addTextInput(vpos : int, hpos : int, vsize : int, hsize : int, ID : int) : void;
+
+    + addClickFunction(fun : functionPtr) : void;
+
+    + clear() : void;
+    + keyPress(key : int);
+    + mouseClick(button : int, state : int, xpos : GLfloat, yPos : GLfloat) : int;
+
+    + visible() : bool;
+    + getState(ID : int) : bool;
+    + setState(ID : int, state : bool) : void;
+
+    + getTextInput(ID : int) : string;
+    + getElement(ID : int) : guiElement*;
+
+}
+frame "1" *-- "0..*" guiElement
+
+class textDisp extends guiElement {
+    - text : string;
+    - textColor : vector<GLfloat>
+
+    + textDisp(vsize : int, hsize : int, ID : int, text : const char*, color : vector<GLfloat>);
+    + textDisp(vsize : int, hsize : int, ID : int, text : const char*);
+
+    + onClick(fun : functionPtr) : void;
+    
+    + setTextColor(r : GLfloat, g : GLfloat, b : GLfloat) : void;
+    + setText(text : const char*) : void;
+
+    + draw() : void;
+}
+
+class textInput extends guiElement {
+    - text : string;
+    - textColor : vector<GLfloat>
+
+    + textInput(vsize : int, hsize : int, ID : int);
+
+    + getText() : string;
+
+    + onKeyPress(int) : void;
+    + onClick(fun : functionPtr) : void;
+    + addChar(character : char) : void;
+    + deleteChar() : void;
+    
+    + draw() : void;
+    + clear() : void;
+
+    + setClicked(state : bool) : void;
+}
+
+class button extends guiElement {
+    - text : string;
+    - color : vector<GLfloat>
+
+    + button(vsize : int, hsize : int, ID : int, status : bool, color : vector<GLfloat>);
+    + button(vsize : int, hsize : int, ID : int, status : bool);
+
+    + setText(const char*) : void;
+    + draw() : void;
+}
+
+class toggleButton extends button {
+    - state : bool;
+
+    + toggleButton(vsize : int, hsize : int, ID : int, status : bool);
+
+    + getState() : bool : void;
+    + setState(state : bool) : void;
+
+    + onClick(fun : functionPtr) : void;
+    
+    + toggle() : void;
+}
+
+class selectionBox extends square {
+    + draw() : void;
+    + clearVertex() : void;
+
+    + addStart(x : GLfloat, y : GLfloat) : void;
+    + updateLength(x : GLfloat, y : GLfloat) : void;
+}
+
+class window {
+    - vision : scene*;
+    
+    - selectedShape : geometry*;
+    - selectionBox : selBox;
+    - selectedShapeID : usigned int;
+
+    - inType : inputType;
+
+    - aspectRatio : GLfloat;
+    
+    - waitingInput : int;
+    - width : int;
+    - height : int;
+    - currentMenu : int;
+
+    - menu : map<int, frame*>;
+    - tempMenu : pair<int, bool>;
+
+    + window(width : int, height : int, title : char*, argc : int*, argv : char**)
+    + ~window()
+
+    + input() : void;
+    + init() : void;
+
+    + updateScene() : void;
+    + deleteShape() : void;
+    
+    + void select(std::pair<unsigned int, geometry*>);
+    + clearSelection() : void;
+
+    + showPopup(text : char*) : void;
+    + closePopup() : void;
+
+    + addSpline(pointNum : int, order : int, t : inputType) : void;
+
+    + setMenu(ID : int, state : menuState = VISIBLE, clear : bool = true) : void;
+    + getMenu() : frame*;
+
+    + menuClick0(ID : int) : static void;
+    + menuClick1(ID : int) : static void;
+    + menuClick2(ID : int) : static void;
+    + menuClick3(ID : int) : static void;
+
+    + draw() : static void;
+    + mouseClick(button : int, state : int, x : int, y : int) : static void;
+    + keyp(unsigned char, x : int, y : int) : static void;
+    + resize(w : int, h : int) : static void;
+    + mouseMove(x : int, y : int) : static void;
+}
+window "1" *-- "1" scene
+window "1" *-- "1" selectionBox
+window "1" *-- "0..*" frame
+
+
+@enduml
